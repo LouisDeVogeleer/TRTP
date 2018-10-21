@@ -9,7 +9,7 @@
 #include "socket.h"
 
 
-//pas oublier de free : file, host
+
 uint8_t numSeq = 0 ;
 void sending(int sfd, char* payload, uint16_t length);
 
@@ -18,8 +18,8 @@ int main(int argc, char *argv[]){
 	char * file;
 	//char * payload;
 	int isLocal = 0;      /*  Si = 1, l'hote est local. Sinon, il est précisé dans host.*/
-	char * host;
-	int port;
+	char * host = NULL;
+	int port = 0;
 	char payload [512];
 	struct sockaddr_in6 addr;
 	
@@ -85,6 +85,13 @@ int main(int argc, char *argv[]){
 		sending(sfd, payload, err);
 		
 	}
+	
+	sending(sfd, "z", );
+	sending(sfd, "z", );
+	sending(sfd, "z", );
+	
+	free(host);
+	free(file);
 	
 	return 0;
 }
