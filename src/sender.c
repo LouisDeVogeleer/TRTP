@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include "packet_interface.h"
+
 #include <time.h> 
 
 
@@ -90,5 +91,6 @@ void sending(int sfd,char* payload){
   if(write(sfd,buff,maxLen)<0){
     fprintf(stderr,"failed to write on the socket");
   }
+  pkt_del(packet);
   numSeq++;
 }
