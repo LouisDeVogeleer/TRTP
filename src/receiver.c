@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-
+#include "packet_interface.h"
+#include <time.h> 
 
 //pas oublier de free : file, host
 int main(int argc, char *argv[]){
@@ -12,7 +13,15 @@ int main(int argc, char *argv[]){
 	int isAllInt = 0;      /*  Si = 1, on ecoute toutes les interfaces . Sinon, l'hote est précisé dans host.*/
 	char * host;
 	int port;
-	
+	struct sockaddr_in6 addr;
+	const char *erro=real_address(host,&addr);
+	if(erro!=NULL){
+	  return EXIT_FAILURE;
+	}
+	int sfd=create_socket(&adr,port,NULL,-1);
+	if(sfd<-1){
+	  return EXIT_FAILURE;
+	}
 	
 	/* Interprétation des arguments */
 	for(int i = 1; i < argc; i++){
@@ -41,6 +50,7 @@ int main(int argc, char *argv[]){
 			port = atoi(argv[i]);
 		}
 	}
+	receiving(sfd);
 	
 	printf("-> isOutFile : %d\n", isOutFile);
 	if(isOutFile == 1) printf("-> file : %s\n", file);
@@ -48,4 +58,13 @@ int main(int argc, char *argv[]){
 	if(isAllInt == 0) printf("-> host : %s\n", host);
 	printf("-> port : %d\n", port);
 }
-	
+void receiving(int sfd,char* buffer,int lenReceived8){
+  pkt_t *packet=pkt_new();
+  pkt_status_code err=pkt_decode(buffer,lenReceived8,packet);
+  if(err!=PKT_OK){
+    fprintf(stderr,"error  decode");
+  }
+
+
+
+}	
