@@ -37,7 +37,7 @@ int create_socket(struct sockaddr_in6 *source_addr,
                  int src_port,
                  struct sockaddr_in6 *dest_addr,
                  int dst_port);
-				 
+				
 
 /* Block the caller until a message is received on sfd,
  * and connect the socket to the source addresse of the received message.
