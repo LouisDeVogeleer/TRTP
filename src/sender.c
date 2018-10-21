@@ -83,7 +83,7 @@ void sending(int sfd,char* payload){
   pkt_set_type(packet,PTYPE_DATA);
   pkt_set_window(packet,4);
   pkt_set_seqnum(packet, numSeq);
-  pkt_set_timestamp(packet,clock());
+  pkt_set_timestamp(packet,clock()/CLOCKS_PER_SEC);
   pkt_set_payload(packet,payload,err);
   if(pkt_encode(packet,buff,&maxLen)!=PKT_OK){
     fprintf(stderr,"failed to encode");
