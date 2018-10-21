@@ -1,6 +1,6 @@
 GCC = gcc
 # See gcc/clang manual to understand all flags
-CFLAGS += -std=c99 # Define which version of the C standard to use
+CFLAGS += -std=gnu99 # Define which version of the C standard to use
 CFLAGS += -Wall # Enable the 'all' set of warnings
 CFLAGS += -Werror # Treat all warnings as error
 CFLAGS += -Wshadow # Warn when shadowing variables
@@ -28,4 +28,3 @@ receiver: src/receiver.o src/socket.o src/packet_implement.c
 # compile them and link the resulting *.o's into an executable named database
 
 .PHONY: clean
-//TODO

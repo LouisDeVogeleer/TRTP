@@ -15,7 +15,7 @@ void sending(int sfd, char* payload, uint16_t length);
 
 int main(int argc, char *argv[]){
 	int isInFile = 0;         /*  Si = 1, le payload vient de file. Sinon, le payload vient de STDIN.*/
-	char * file;
+	char * file = NULL;
 	//char * payload;
 	int isLocal = 0;      /*  Si = 1, l'hote est local. Sinon, il est précisé dans host.*/
 	char * host = NULL;
@@ -86,9 +86,9 @@ int main(int argc, char *argv[]){
 		
 	}
 	
-	sending(sfd, "z", );
-	sending(sfd, "z", );
-	sending(sfd, "z", );
+	sending(sfd, "z", 1);
+	sending(sfd, "z", 1);
+	sending(sfd, "z", 1);
 	
 	free(host);
 	free(file);

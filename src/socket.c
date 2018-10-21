@@ -8,11 +8,12 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <errno.h>
+#include "socket.h"
 
 const char * real_address(const char *address, struct sockaddr_in6 *rval){
-    struct addrinfo *result ;
+    struct addrinfo * result = NULL;
     struct addrinfo hints;
-    memset(&hints, 0, sizeof(struct addrinfo));
+    memset(&hints, 0, sizeof hints);
     hints.ai_family =  AF_INET6;    
     hints.ai_socktype = 0;
     hints.ai_flags = 0;    
@@ -20,9 +21,9 @@ const char * real_address(const char *address, struct sockaddr_in6 *rval){
     hints.ai_canonname = NULL;
     hints.ai_addr = NULL;
     hints.ai_next = NULL;
-    int a=getaddrinfo(address,NULL, &hints, &result);
+    int a = getaddrinfo(address,NULL, &hints, &result);
     if(a!=0){
-        return gai_strerror(a);
+        return "Error on getaddrinfo";
     }
     struct sockaddr_in6 * result1= (struct sockaddr_in6 *)(result->ai_addr);
     *rval=*result1;
