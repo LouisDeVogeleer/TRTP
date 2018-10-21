@@ -13,7 +13,10 @@ int main(int argc, char *argv[]){
 	char * host;
 	int port;
 	
+	
+	/* Interprétation des arguments */
 	for(int i = 1; i < argc; i++){
+		x
 		if(isOutFile == 0 && strcmp(argv[i], "-f") == 0){
 			isOutFile = 1;
 			int lenfile = strlen(argv[i+1]);

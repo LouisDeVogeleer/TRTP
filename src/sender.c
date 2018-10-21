@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
+#include <unistd.h>
 
 
 //pas oublier de free : file, host
@@ -12,7 +13,10 @@ int main(int argc, char *argv[]){
 	int isLocal = 0;      /*  Si = 1, l'hote est local. Sinon, il est précisé dans host.*/
 	char * host;
 	int port;
-		
+	char * payload;
+	
+
+    /* Interprétation des arguments */	
 	for(int i = 1; i < argc; i++){
 		if(isInFile == 0 && strcmp(argv[i], "-f") == 0){
 			isInFile = 1;
@@ -39,10 +43,24 @@ int main(int argc, char *argv[]){
 		}
 	}
 	
-	printf("-> isInFile : %d\n", isInFile);
-	if(isInFile == 1) printf("-> file : %s\n", file);
-	printf("-> isLocal : %d\n", isLocal);
-	if(isLocal == 0) printf("-> host : %s\n", host);
-	printf("-> port : %d\n", port);
+	
+	/* Lecture du fichier ou de STDIN pour creer le payload */
+	payload = (char *) malloc(512*sizeof(char));
+	int err;
+	
+	if(isInFile == 1){
+		FILE * f = fopen(file, "r");
+		err = fread(payload, sizeof(char), 512, f);
+		if(err <= 0){
+			fprintf(stderr, "Erreur : fread de %s retourne <=0", file);
+		}
+	}
+	else{
+		err = read(0, payload, 512);
+		if( err<0){
+			fprintf(stderr, "Erreur : read de stdin retourne <0");
+		}
+	}
+	return port;
 }
 	
