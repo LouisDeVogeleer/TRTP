@@ -3,9 +3,12 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
+#include "packet_interface.h"
+#include <time.h> 
 
 
 //pas oublier de free : file, host
+uint8_t:5 numSeq=0;
 int main(int argc, char *argv[]){
 	int isInFile = 0;         /*  Si = 1, le payload vient de file. Sinon, le payload vient de STDIN.*/
 	char * file;
@@ -15,7 +18,15 @@ int main(int argc, char *argv[]){
 	int port;
 	char * payload;
 	
-
+	struct sockaddr_in6 addr;
+	const char *erro=real_address(host,&addr);
+	if(erro!=NULL){
+	  return EXIT_FAILURE;
+	}
+	int sfd=create_socket(NULL,-1,&addr,port);
+	if(sfd<-1){
+	  return EXIT_FAILURE;
+	}
     /* Interprétation des arguments */	
 	for(int i = 1; i < argc; i++){
 		if(isInFile == 0 && strcmp(argv[i], "-f") == 0){
@@ -53,6 +64,7 @@ int main(int argc, char *argv[]){
 		err = fread(payload, sizeof(char), 512, f);
 		if(err <= 0){
 			fprintf(stderr, "Erreur : fread de %s retourne <=0", file);
+ 
 		}
 	}
 	else{
@@ -61,6 +73,22 @@ int main(int argc, char *argv[]){
 			fprintf(stderr, "Erreur : read de stdin retourne <0");
 		}
 	}
-	return port;
+	sending(sfd,payload);
 }
-	
+void sending(int sfd,char* payload){
+  size_t maxLen=528;
+  char buff[maxLen];
+  packet=pkt_new();
+  pkt_set_type(packet,PTYPE_DATA);
+  pkt_set_window(packet,4);
+  pkt_set_seqnum(packet, numSeq);
+  pkt_set_timestamp(packet,clock());
+  pkt_set_payload(packet,payload,err);
+  if(pkt_encode(packet,buff,&maxLen)!=PKT_OK){
+    fprintf(stderr,"failed to encode");
+  }  
+  if(write(sfd,buff,maxLen)<0){
+    fprintf(stderr,"failed to write on the socket");
+  }
+  numSeq++;
+}
