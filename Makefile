@@ -1,6 +1,6 @@
 GCC = gcc
 # See gcc/clang manual to understand all flags
-CFLAGS += -std=gnu99 # Define which version of the C standard to use
+CFLAGS += -std=gnu99  # Define which version of the C standard to use
 CFLAGS += -Wall # Enable the 'all' set of warnings
 CFLAGS += -Werror # Treat all warnings as error
 CFLAGS += -Wshadow # Warn when shadowing variables
@@ -11,15 +11,15 @@ CFLAGS += -fstack-protector-all # Add canary code to detect stack smashing
 
 # We have no libraries to link against except libc, but we want to keep
 # the symbols for debugging
-LDFLAGS= -lz
-LDFLAGS= -rdynamic
+LDFLAGS = -lz
+LDFLAGS += -rdynamic
 
 # Default target
 all: sender receiver 
 
-sender: src/sender.o src/socket.o src/packet_implement.c
+sender: src/sender.o src/socket.o src/packet_implem.c
 
-receiver: src/receiver.o src/socket.o src/packet_implement.c
+receiver: src/receiver.o src/socket.o src/packet_implem.c
 
 %: src/%.o
 	$(CC) $^ -o $@ $(LDFLAGS)
@@ -28,3 +28,4 @@ receiver: src/receiver.o src/socket.o src/packet_implement.c
 # compile them and link the resulting *.o's into an executable named database
 
 .PHONY: clean
+	

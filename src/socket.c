@@ -1,4 +1,4 @@
-#include <stdlib.h> // la base
+#include <stdlib.h> 
 #include <stdio.h> //printf
 #include <netinet/in.h> //struct addrin_6
 #include <string.h> //memset

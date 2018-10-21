@@ -3,6 +3,7 @@
 
 #include <stddef.h> /* size_t */
 #include <stdint.h> /* uintx_t */
+#include <zlib.h>
 
 /* Raccourci pour struct pkt */
 typedef struct pkt pkt_t;

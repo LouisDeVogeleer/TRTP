@@ -23,13 +23,15 @@ int main(int argc, char *argv[]){
 	char payload [512];
 	struct sockaddr_in6 addr;
 	
-    /* Interprétation des arguments */	
-	for(int i = 1; i < argc; i++){
+    /* Interprétation des arguments */
+	int i;
+	for(i = 1; i < argc; i++){
 		if(isInFile == 0 && strcmp(argv[i], "-f") == 0){
 			isInFile = 1;
 			int lenfile = strlen(argv[i+1]);
 			file = (char *) malloc(lenfile*sizeof(char));
-			for(int j=0; j<lenfile; j++){
+			int j;
+			for(j=0; j<lenfile; j++){
 				file[j] = argv[i+1][j];
 			}
 			i++;
@@ -41,7 +43,8 @@ int main(int argc, char *argv[]){
 		else if(isLocal == 0 && host == NULL) {
 			int lenhost = strlen(argv[i]);
 			host = (char *) malloc(lenhost*sizeof(char));
-			for(int j=0; j<lenhost; j++){
+			int j;
+			for(j=0; j<lenhost; j++){
 				host[j] = argv[i][j];
 				}
 		}
