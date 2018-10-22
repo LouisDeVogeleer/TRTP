@@ -1,0 +1,194 @@
+commit 99dcbd63da443d8ca56acfb2a00d82509976f469
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Sun Oct 21 13:41:32 2018 +0200
+
+    final v1
+
+ Makefile               | 13 +++++++------
+ src/packet_interface.h |  1 +
+ src/receiver.c         | 32 ++++++++++++++++++--------------
+ src/sender.c           | 11 +++++++----
+ src/socket.c           |  2 +-
+ 5 files changed, 34 insertions(+), 25 deletions(-)
+
+commit 35ba142b706c329f95bf915d262908698898db5e
+Author: LouisDeVogeleer <38432465+LouisDeVogeleer@users.noreply.github.com>
+Date:   Mon Oct 22 05:25:50 2018 +0200
+
+    Add files via upload
+
+ LINGI1341_TRTP.pdf | Bin 0 -> 180591 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 271308980b2f4f4dc3d749bc226330bfaadd7428
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Sun Oct 21 12:42:05 2018 +0200
+
+    maj
+
+ Makefile     | 5 ++---
+ src/sender.c | 8 ++++----
+ src/socket.c | 9 +++++----
+ 3 files changed, 11 insertions(+), 11 deletions(-)
+
+commit a85f993522ddd769789667f36f80aee0c8091dde
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Sun Oct 21 11:49:09 2018 +0200
+
+    maj receiver
+
+ src/receiver.c | 81 ++++++++++++++++++++++++++++++++++++++++------------------
+ src/sender.c   | 13 +++++++---
+ 2 files changed, 66 insertions(+), 28 deletions(-)
+
+commit 47d79a603fb2ef5d5bd619ff87ff1010e2f60b9d
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Mon Oct 22 03:11:27 2018 +0200
+
+    Makefile
+
+ Makefile | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+
+commit b998ec819f61acb71aba5748af0949082c9b8448
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Sun Oct 21 10:28:04 2018 +0200
+
+    maj sender
+
+ src/sender.c | 102 ++++++++++++++++++++++++++++++++++-------------------------
+ src/socket.h |   2 +-
+ 2 files changed, 60 insertions(+), 44 deletions(-)
+
+commit 8d016e04e9c80219cf39388fb2267ceef3b295a3
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Sun Oct 21 10:02:06 2018 +0200
+
+    queue
+
+ src/queue.c | 40 ++++++++++++++++++++++++++++++++++++++++
+ src/queue.h | 21 +++++++++++++++++++++
+ 2 files changed, 61 insertions(+)
+
+commit 53ae216ee923d3d9724782a2dc1a532fe9a4e3d2
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Mon Oct 22 01:40:59 2018 +0200
+
+    modifier nom
+
+ src/{pkt.c => packet_implem.c}    | 0
+ src/{pkt.h => packet_interface.h} | 0
+ 2 files changed, 0 insertions(+), 0 deletions(-)
+
+commit 07115b1e1875e11ebbdbc0f0d5359f4405d53869
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Mon Oct 22 01:37:07 2018 +0200
+
+    Create socket an create pkt decoded
+
+ src/receiver.c | 25 ++++++++++++++++++++++---
+ 1 file changed, 22 insertions(+), 3 deletions(-)
+
+commit 630523c1fb8b86037e8b339ca7efecd57f3e85b3
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Mon Oct 22 00:58:34 2018 +0200
+
+    modif clock
+
+ src/sender.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit b381bcfea3b490d709cb1799e42b8df4215b82b3
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Mon Oct 22 00:14:33 2018 +0200
+
+    free packet: memory leak
+
+ src/sender.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+commit 6fa6b4189970fbc3e7186d88d112a2047bd76d81
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Mon Oct 22 00:09:49 2018 +0200
+
+    sender update:connextion +sending
+
+ src/sender.c | 34 +++++++++++++++++++++++++++++++---
+ 1 file changed, 31 insertions(+), 3 deletions(-)
+
+commit 43047532d75717f276692e87e19a081927dfb730
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Sun Oct 21 02:44:02 2018 +0200
+
+    socket
+
+ src/socket.c | 148 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ src/socket.h |  58 +++++++++++++++++++++++
+ 2 files changed, 206 insertions(+)
+
+commit 15d2456e14dd933fbfc82411f635c5ac41fa712a
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Sun Oct 21 19:07:12 2018 +0200
+
+    pkt.h ajout
+
+ src/pkt.h | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 124 insertions(+)
+
+commit 1e31257e4c2a1e58d313b8b214a30573749b1430
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Sun Oct 21 19:02:35 2018 +0200
+
+    Packet implement ajout
+
+ src/pkt.c | 259 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 259 insertions(+)
+
+commit 851cbfa56191cd563a4357bd3d505cff3d5a0536
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Sun Oct 21 02:22:55 2018 +0200
+
+    maj sender
+
+ src/receiver.c |  3 +++
+ src/sender.c   | 30 ++++++++++++++++++++++++------
+ 2 files changed, 27 insertions(+), 6 deletions(-)
+
+commit 9f810ac8887385755f0962134ec57430fc2136b3
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 19 15:18:53 2018 +0200
+
+    interface 2 fonctions
+
+ src/receiver.c | 48 +++++++++++++++++++++++++++++++++++++++++++-----
+ src/sender.c   | 50 +++++++++++++++++++++++++++++++++++++++++---------
+ 2 files changed, 84 insertions(+), 14 deletions(-)
+
+commit 25c30fc31bb49480f51c5434353796312013b07f
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 19 10:36:27 2018 +0200
+
+    ajout de sender.c et receiver.c
+
+ src/{main.c => receiver.c} |  0
+ src/sender.c               | 16 ++++++++++++++++
+ 2 files changed, 16 insertions(+)
+
+commit 30d5100597a72db5855289c0cc2a5b7ecfc738e8
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 19 09:22:09 2018 +0200
+
+    creation des dossiers
+
+ Makefile             | 1 +
+ main.c => src/main.c | 0
+ 2 files changed, 1 insertion(+)
+
+commit fea037e32969b105f7830911465fc10b5cf465dd
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 19 09:13:17 2018 +0200
+
+    start
+
+ main.c | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
