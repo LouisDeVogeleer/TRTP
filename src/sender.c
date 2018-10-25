@@ -67,7 +67,7 @@ int main(int argc, char *argv[]){
 	int err;
 	int eof = 0;
 	int rfd = 0;
-	char payload [512];
+	char * payload;
 	char bufWrite[528];
 	char bufRead[528];
 	fd-set rfds;
@@ -77,6 +77,8 @@ int main(int argc, char *argv[]){
 	int readRet = 1;
 	isBufferFull =0;
 	pkt_t * newPacket = NULL;
+	int frameN = 0;
+	int maxFrameN = 4;
 
 	
 	if(isInFile == 1){
@@ -86,12 +88,12 @@ int main(int argc, char *argv[]){
 	int maxfd = rfd ;
 	if(sfd > rfd) maxfr = sfd ;
 	
-	//TODO creer le buffer
+	Queue buffer = NewQueue();
 	
 	while(readRet != EOF){
 		FD_ZERO(&rfds);
 		FD_SET(sfd &rfds);
-		if( isBufferFull == 0){
+		if(q->size < 3){
 			FD_SET(rfd, &rfds);
 		}
 		
@@ -103,11 +105,15 @@ int main(int argc, char *argv[]){
 			if(FD_ISSET(rfd, &rfds){
 				memset((void*) payload, 0, 512);
 				if(  (readRet =  read(rfd, payload, 512))  > 0){
-					int dataLen = readRet + 16;
-					newPacket = createPacket(payload, readRet);
 					
-					//TODO ajouter dans le buffer
+					newPacket = createPacket(payload, readRet, frameN % maxFrameN);
+					frameN++;
 					
+					if(enqueue(q, newPacket) == -1){
+						fprintf(stderr, "failed to enqueue newPacket");
+					}
+					
+					int dataLen = readRet + 16;	//verifier si bug				
 					memset((void*) bufWrite, 0, 528);
 					if(pkt_encode(packet, bufWrite, &datLen) != PKT_OK){
 						fprintf(stderr, "failed to encode");
@@ -124,7 +130,7 @@ int main(int argc, char *argv[]){
 			
 			/* Acces a la lecture des donnees du reseau */
 			if(FD_ISSET(sfd, &rfds){
-				memset((void*) bufRead, 0, 528);
+				memset((void*) bufRead, 0, 528); //vraiment utile 528 pour un ACK
 				if(read(sfd, bufRead, 528){
 					//TODO cas ACK et maj du buffer
 					//TODO cas NACK, quid ?
@@ -149,12 +155,12 @@ sending(sfd, payload, err);
 */
 
 
-pkt_t * createPacket(char * payload, uint16_t length){
+pkt_t * createPacket(char * payload, uint16_t length, window){
 	size_t maxLen = 16 + length;
-	pkt_t * newPacket = (pkt_t *) malloc(sizeof(pkt_t));
-	newPacket=pkt_new();
+	pkt_t * packet = (pkt_t *) malloc(sizeof(pkt_t));
+	packet=pkt_new();
 	pkt_set_type(packet,PTYPE_DATA);
-	pkt_set_window(packet, 4);
+	pkt_set_window(packet, window);
 	pkt_set_seqnum(packet, numSeq);
 	pkt_set_timestamp(packet, timestamp);
 	pkt_set_payload(packet, payload, length);
@@ -163,8 +169,8 @@ pkt_t * createPacket(char * payload, uint16_t length){
 	if(numSeq == 255){
 		numSeq = 0;
 	}
-	numSeq++;
+	else numSeq++;
 	
-	return newPacket;	
+	return packet;	
 }
 			

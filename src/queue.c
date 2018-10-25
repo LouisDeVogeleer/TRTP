@@ -17,6 +17,7 @@ int isEmpty(Queue q){
 
 int enqueue(Queue * q, pkt_t * item){
 	NODE * node = (NODE *) malloc(sizeof(NODE));
+	if(node == NULL) return -1;
 	node->item = item;
 	node->prev = NULL;
 	
@@ -29,6 +30,7 @@ int enqueue(Queue * q, pkt_t * item){
 		q->head = node;
 	}
 	q->size ++;
+	return 0;
 }
 
 pkt_t * dequeue(Queue * q){
