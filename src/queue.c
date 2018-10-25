@@ -15,7 +15,7 @@ int isEmpty(Queue q){
 	return q->size == 0;
 }
 
-int enqueue(Queue * q, pkt_t* item){
+int enqueue(Queue * q, pkt_t * item){
 	NODE * node = (NODE *) malloc(sizeof(NODE));
 	node->item = item;
 	node->prev = NULL;
@@ -31,27 +31,24 @@ int enqueue(Queue * q, pkt_t* item){
 	q->size ++;
 }
 
-char * dequeue(Queue * q){
-  pkt_t * item= (pkt_t *)malloc(sizeof(pkt_t));
+pkt_t * dequeue(Queue * q){
+	pkt_t * item = q->tail->item;
 	NODE * toFree = q->tail;
 	q->tail = q->tail->prev;
 	free(toFree);
 	return item;	
 }
-int alreadyQueue(int seqnum,queue *buffer){
-  if(size==0){
+
+int alreadyQueue(Queue * q, int seqnum){
+  if(q->size==0){
     return 0;
   }
-  NODE * runner=(NODE *)malloc(sizeof(NODE));
-  runner=buffer->head;
-  for(int i=1;i<=buffer->size;i++){
-    
-    if(pkt_get_numseq(runner->item)==seqnum){
+  NODE * runner = q->head;
+  int i;
+  for(i=1; i<=q->size; i++){
+    if(pkt_get_numseq(runner->item) == seqnum){
       return 1;
     }
   }
-  return 0;
-  
-  
-  
+  return 0;  
 }
