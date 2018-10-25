@@ -5,10 +5,12 @@
 #include "packet_interface.h"
 #include "socket.h"
 #include <time.h> 
-
-
-const char * receiving(char* buffer, int lenReceived8);
-
+#include "queue.h"
+struct queue *buffer;
+struct sockaddr_in6 addr;
+pkt_t *pkt=NULL;
+int lastack;
+#define WINDOWSIZE 4
 int main(int argc, char *argv[]){
 	int isOutFile = 0;         /*  Si = 1, le payload ira vers file. Sinon, le payload vient de STDOUT.*/
 	char * file = NULL;
@@ -59,20 +61,65 @@ int main(int argc, char *argv[]){
 	  return EXIT_FAILURE;
 	}
 	
-	
-	FILE *f;
+	int wfd=1;
 	if(isOutFile == 1){
-		f = fopen(file, "w");
+		wfd = open(file, O_WRONLY);
 	}
 	
 	int wait = wait_for_client(sfd);
 	if(wait == -1){
 		fprintf(stderr, "Erreur : aucune donnee recue");
 	}
-	
+	buffer=NewQueue();
+	if(buffer==NULL){
+	  fprintf("Erreur New queue");
+	}
+	socklen_t solen = sizeof(struct sockaddr_in6);
+	while(!eof){
+	  ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
+	  if(nbre=0){
+	    eof=1;
+	  }
+	  else if(nbre<0)
+	    {
+	      fprntif("erreur recvfrom");
+	    }
+	  else{
+	    
+	    pkt_status_code verifstat=pkt_decode(buff,sizeof(buff),pkt);
+	    if(verifstat!=PKT_OK){
+	      fprintf("Erreur du décodage")
+		}
+	    else{
+	      int seqnum=pkt_get_seqnum(pkt);
+	      if(!alreadyQueue(buffer,seqnum)){
+		if(isIn(lastack+1,WINDOWSIZE-lastack,pkt_get_window(pkt)){
+		
+		  if(pkt_get_window(pkt)==lastack+1){
+		    lastack+=1;
+		    int err=write(wfd,pkt->payload,pkt->length);
+		    pkt_del(pkt);
+		  }
+		  else{
+		    int b=enqueue(buffer,pkt);
+		    if(b==-1){
+		      printf("erreur enqueue");
+		    }
+
+		  }
+		  //Send Ack
+		  }
+		  
+		  }
+	      }
+	      
+	    }
+	  }
+	}
+	  
 	int eof = 0;
 	int err;
-	char buff [512];
+	char buff [528];
 	const char * toWrite;
 	while(eof == 0){
 		int length = read(sfd, buff, 512);
@@ -92,14 +139,9 @@ int main(int argc, char *argv[]){
 			}
 		}
 	}
-	free(file);
-	free(host);
-}
-const char * receiving(char* buffer, int lenReceived8){
-	pkt_t *packet=pkt_new();
-	pkt_status_code err=pkt_decode(buffer,lenReceived8,packet);
-	if(err!=PKT_OK){
-		fprintf(stderr,"error  decode");
+	int isIn(int a, int b, int c){
+	  if(val<=b&&val>=a){
+	    return 1;
+	  }
+	  return -1;
 	}
-	return pkt_get_payload(packet);
-}	
