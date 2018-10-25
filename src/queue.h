@@ -2,9 +2,10 @@
 #define _BUFFER_H
 #include <stdlib.h> 
 #include <stdio.h>
+#include "packet_interface.h"
 
 typedef struct node_t{
-	char * payload;
+	pkt_t * item;
 	struct node_t * prev;
 } NODE;
 
@@ -16,6 +17,6 @@ typedef struct Queue{
 
 int isEmpty(Queue q);
 
-int enqueue(Queue * q, char * payload);
+int enqueue(Queue * q, pkt_t item);
 
-char * dequeue(Queue * q);
+pkt_t * dequeue(Queue * q);
