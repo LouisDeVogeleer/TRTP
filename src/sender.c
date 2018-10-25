@@ -20,7 +20,6 @@ int main(int argc, char *argv[]){
 	int isLocal = 0;      /*  Si = 1, l'hote est local. Sinon, il est précisé dans host.*/
 	char * host = NULL;
 	int port = 0;
-	char payload [512];
 	struct sockaddr_in6 addr;
 	
     /* Interprétation des arguments */
@@ -67,56 +66,105 @@ int main(int argc, char *argv[]){
 	/* Lecture du fichier ou de STDIN et creation des pkt*/
 	int err;
 	int eof = 0;
+	int rfd = 0;
+	char payload [512];
+	char bufWrite[528];
+	char bufRead[528];
+	fd-set rfds;
+	struct timeval  tv;
+	tv.tv_sec = 5;
+	tv.tv_usec = 0;
+	int readRet = 1;
+	isBufferFull =0;
+	pkt_t * newPacket = NULL;
+
 	
-	FILE *f;
 	if(isInFile == 1){
-		f = fopen(file, "r");
+		rfd= open(file, O_RDONLY);
 	}
 	
-	while(eof == 0){
-		
-		if(isInFile == 1){
-			err = fread(payload, sizeof(char), 512, f);
-			if(err <= 0) fprintf(stderr, "Erreur : fread de %s retourne <=0", file);
-			eof = feof(f);
+	int maxfd = rfd ;
+	if(sfd > rfd) maxfr = sfd ;
+	
+	//TODO creer le buffer
+	
+	while(readRet != EOF){
+		FD_ZERO(&rfds);
+		FD_SET(sfd &rfds);
+		if( isBufferFull == 0){
+			FD_SET(rfd, &rfds);
 		}
-		else{
-			err = read(0, payload, 512);
-			if(err < 0) fprintf(stderr, "Erreur : read de stdin retourne <0");
-			if(err == 0) eof = 1;
-		}	
-		sending(sfd, payload, err);
 		
+		err = select(maxfd + 1, &rfds, NULL, NULL);
+		
+		if(ret == -1) perror("select");
+		if(ret > 0){
+			/* Acces a la lecture de STDIN ou du fichier d'entree */
+			if(FD_ISSET(rfd, &rfds){
+				memset((void*) payload, 0, 512);
+				if(  (readRet =  read(rfd, payload, 512))  > 0){
+					int dataLen = readRet + 16;
+					newPacket = createPacket(payload, readRet);
+					
+					//TODO ajouter dans le buffer
+					
+					memset((void*) bufWrite, 0, 528);
+					if(pkt_encode(packet, bufWrite, &datLen) != PKT_OK){
+						fprintf(stderr, "failed to encode");
+					}  
+					
+					if(write(sfd, bufWrite, dataLen)  < 0){
+						perror("failed to write on sfd");
+					}
+					
+					pkt_del(newPacket);
+				}
+				else perror("failed to read input")
+			}
+			
+			/* Acces a la lecture des donnees du reseau */
+			if(FD_ISSET(sfd, &rfds){
+				memset((void*) bufRead, 0, 528);
+				if(read(sfd, bufRead, 528){
+					//TODO cas ACK et maj du buffer
+					//TODO cas NACK, quid ?
+				}
+			}
+			
+			//TODO checker timer dans la queue et renvoyer si besion
+		}
 	}
-	
-	sending(sfd, "z", 1);
-	sending(sfd, "z", 1);
-	sending(sfd, "z", 1);
 	
 	free(host);
 	free(file);
-	
+
 	return 0;
 }
 
+/*
+err = read(0, payload, 512);
+if(err < 0) fprintf(stderr, "Erreur : read de stdin retourne <0");
+if(err == 0) eof = 1;
+sending(sfd, payload, err);
+*/
 
-void sending(int sfd, char * payload, uint16_t length){
-	size_t maxLen = 8 + length;
-	char buff[maxLen];
-	pkt_t * packet=pkt_new();
+
+pkt_t * createPacket(char * payload, uint16_t length){
+	size_t maxLen = 16 + length;
+	pkt_t * newPacket = (pkt_t *) malloc(sizeof(pkt_t));
+	newPacket=pkt_new();
 	pkt_set_type(packet,PTYPE_DATA);
-	pkt_set_window(packet,4);
+	pkt_set_window(packet, 4);
 	pkt_set_seqnum(packet, numSeq);
-	pkt_set_timestamp(packet,clock()/CLOCKS_PER_SEC);
+	pkt_set_timestamp(packet, timestamp);
 	pkt_set_payload(packet, payload, length);
 	pkt_set_length(packet, length);
-	if(pkt_encode(packet, buff, &maxLen) != PKT_OK){
-		fprintf(stderr,"failed to encode");
-	}  
-	if(write(sfd, buff, maxLen)<0){
-		fprintf(stderr,"failed to write on the socket");
+	
+	if(numSeq == 255){
+		numSeq = 0;
 	}
-	pkt_del(packet);
 	numSeq++;
+	
+	return newPacket;	
 }
 			
