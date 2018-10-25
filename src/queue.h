@@ -20,3 +20,5 @@ int isEmpty(Queue q);
 int enqueue(Queue * q, pkt_t item);
 
 pkt_t * dequeue(Queue * q);
+Queue *NewQueue();
+int alreadyQueue(Queue * q, int seqnum);
