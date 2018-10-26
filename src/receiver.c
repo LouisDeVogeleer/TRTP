@@ -7,11 +7,20 @@
 #include <time.h> 
 #include <fcntl.h>
 #include "queue.h"
+#define WINDOWSIZE 4
 struct Queue *buffer;
 
 pkt_t *pkt=NULL;
 
-#define WINDOWSIZE 4
+int isIn(int a, int b, int c){
+	  if(c<=b&&c>=a){
+	    return 1;
+	  }
+	  return 0;
+	}
+int alreadyQueue(Queue * q, int seqnum);
+
+
 int main(int argc, char *argv[]){
   int wfd=1;
 	int isOutFile = 0;         /*  Si = 1, le payload ira vers file. Sinon, le payload vient de STDOUT.*/
@@ -75,9 +84,9 @@ int main(int argc, char *argv[]){
 	  printf("Erreur New queue");
 	}
 	socklen_t solen = sizeof(struct sockaddr_in6);
-	int eof=0;
+	int eof1=0;
 	int expSeqnum=0;
-	while(!eof){//début de la boucle
+	while(!eof1){//début de la boucle
 	  char *buf[528];
 	  
 	  if(alreadyQueue(buffer,expSeqnum)){//Si l'element qu'on veut est dans la queue
@@ -97,24 +106,42 @@ int main(int argc, char *argv[]){
 		    size_t len=524;
 		    char send[524];
 		    pkt_status_code stat=pkt_encode(pkt,send,&len);
+		    if(stat!=PKT_OK){
+		      printf("Erreur encode");
+		    }
+
 	    
 	  }// fin du si l'element voulue est dans la queue
 	  else{
 	    ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
-	    if(nbre==0){ //Si on a rien lu
-	      eof=1;
-	    }
-	    else if(nbre<0)//Si une erreur
+	   
+	    if(nbre<0)//Si une erreur
 	      {
 		printf("erreur recvfrom");
 	      }
 	    else{//Si on a lu qqch 
 	      
-	      pkt_status_code verifstat=pkt_decode(&buf,sizeof(buf),pkt);
+	      pkt_status_code verifstat=pkt_decode((const char*) buf,sizeof(buf),pkt);
 	      if(verifstat!=PKT_OK){
 		printf("Erreur du décodage");
 	      }
 	      else{//si on a réussi a le décoder
+		if(pkt_get_length(pkt)==0){ //Si c'est la fin du fichier
+		  eof1=1;
+		  size_t len=528;
+		  char send[528];
+		  pkt_status_code stat=pkt_encode(pkt,send,&len);
+		  if(stat!=PKT_OK){
+		    printf("erreur encode");
+		  }
+		  pkt_del(pkt);
+		  int  err=write(sfd,send,len);
+		  if(err<0){
+		    printf("erreur write");
+		  }
+
+		  
+		}//fin du fichier
 		int seqnum=pkt_get_seqnum(pkt);
 		if(!alreadyQueue(buffer,seqnum)){//si c'est pas un element deja dans la queue
 		  if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
@@ -160,32 +187,21 @@ int main(int argc, char *argv[]){
 	  }//Si il n'était pas dans la queue
 	}//fin de la boucle while
 	
-	int eof = 0;
-	int err;
-	char buff [528];
-	const char * toWrite;
-	while(eof == 0){//debut boucle
-		int length = read(sfd, buff, 512);
-		
-		toWrite = receiving(&buff[0], length);
-		if(strcmp(toWrite, "z") == 0){
-			eof = 1;
-		}
-		else{
-			if(isOutFile == 1){
-				err = fwrite(toWrite, sizeof(char), length, f);
-				if(err <= 0) fprintf(stderr, "Erreur : fwrite de %s retourne <=0", file);
-			}
-			else{
-				err = write(1, toWrite, length);
-				if(err < 0) fprintf(stderr, "Erreur : write sur stdout retourne <0");
-			}
-		}
-	}
-	int isIn(int a, int b, int c){
-	  if(c<=b&&c>=a){
-	    return 1;
-	  }
-	  return 0;
-	}
+
+}
+	  
+  
+
+ alreadyQueue(Queue * q, int seqnum){
+  if(q->size==0){
+    return 0;
+  }
+  NODE * runner = q->head;
+  int i;
+  for(i=1; i<=q->size; i++){
+    if(pkt_get_seqnum(runner->item) == seqnum){
+      return 1;
+    }
+  }
+  return 0;  
 }
