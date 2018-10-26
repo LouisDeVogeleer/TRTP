@@ -69,8 +69,10 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
     
     // on decode CRC1
     uint32_t crc1 = ntohl(*((uint32_t *)(data + 8)));
+	fprintf(stderr, "received n_crc1: %d , h_crc1 : %d\n", htonl(crc1), crc1);
     uint32_t new_crc1 = crc32(0L, Z_NULL, 0);
     new_crc1 = crc32(new_crc1,(const Bytef*) data, 8);
+	fprintf(stderr, "find h_crc1: %d", crc1);
     if(crc1 != new_crc1)
         return E_CRC;
     Fonctio = pkt_set_crc1(pkt, crc1);
@@ -88,8 +90,10 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
    
     // on decode CRC2
     uint32_t crc2 = ntohl(*((uint32_t *)(data + 12 + ntohs(length))));
+	fprintf(stderr, "received n_crc2: %d , h_crc2 : %d\n", htonl(crc2), crc2);
     uint32_t new_crc2 = crc32(0L, Z_NULL, 0);
     new_crc2 = crc32(new_crc2,(const Bytef*) data + 12, ntohs(length));
+	fprintf(stderr, "find h_crc2: %d", crc2);
     if(crc2 != new_crc2)
         return E_CRC;
     Fonctio = pkt_set_crc2(pkt, crc2);
@@ -109,6 +113,7 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     *len+=4;
     uint32_t crc = crc32(0L, Z_NULL, 0);
     crc = htonl(crc32(crc, (Bytef*) buf, 8));//crc1
+	fprintf(stderr, "sent h_crc1: %d , n_crc1 : %d\n", ntohl(crc), crc);
     memcpy(buf+*len,&crc,4);
     *len+=4;
     memcpy(buf+12, pkt->payload, pkt->length);
@@ -116,6 +121,7 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     if(pkt->length>0){
         crc = crc32(0L, Z_NULL, 0);
         crc = htonl(crc32(crc, (Bytef*) buf+12, pkt->length));
+		fprintf(stderr, "sent h_crc2: %d , n_crc2 : %d\n", ntohl(crc), crc);
         memcpy(buf+ *len, &crc, 4);
         *len+=4;
     }

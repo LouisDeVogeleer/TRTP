@@ -22,7 +22,7 @@
  *          (const char* means the caller cannot modify or free the return value,
  *           so do not use malloc!)
  */
-const char * real_address(const char *address, struct sockaddr_in6 *rval);
+int real_address(const char *address, struct sockaddr_in6 *rval);
 
 
 /* Creates a socket and initialize it
@@ -37,7 +37,7 @@ int create_socket(struct sockaddr_in6 *source_addr,
                  int src_port,
                  struct sockaddr_in6 *dest_addr,
                  int dst_port);
-				
+
 
 /* Block the caller until a message is received on sfd,
  * and connect the socket to the source addresse of the received message.
