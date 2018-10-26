@@ -19,7 +19,7 @@ all: receiver sender
 
 sender: src/sender.o src/socket.o src/queue.o src/packet_implem.c
 
-receiver: src/receiver.o src/socket.o src/qeue.o src/packet_implem.c
+receiver: src/receiver.o src/socket.o src/queue.o src/packet_implem.c
 
 %: src/%.o
 	$(CC) $^ -o $@ $(LDFLAGS)
