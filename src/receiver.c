@@ -110,6 +110,9 @@ int main(int argc, char *argv[]){
 		    if(expSeqnum==255){
 		      expSeqnum=0;
 		    }
+		    if(lastack==WINDOWSIZE-1){
+		      lastack=0;
+		    }
 		    pkt_set_seqnum(pkt,expSeqnum);
 		    pkt_set_type(pkt, PTYPE_ACK);
 		    size_t longu=pkt_get_length(pkt);
@@ -168,6 +171,9 @@ int main(int argc, char *argv[]){
 			lastack+=1;
 			if(expSeqnum==255){
 			  expSeqnum=0;
+			}
+			if(lastack==WINDOWSIZE-1){
+			  lastack=0;
 			}
 			pkt_set_seqnum(pkt,expSeqnum);
 			pkt_set_type(pkt, PTYPE_ACK);

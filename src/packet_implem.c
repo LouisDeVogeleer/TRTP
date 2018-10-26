@@ -74,6 +74,8 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
     if(crc1 != new_crc1)
         return E_CRC;
     Fonctio = pkt_set_crc1(pkt, crc1);
+        
+    
     //on decode payload
     if(!pkt_get_tr(pkt)&&pkt_get_length(pkt)>0){
          pkt->payload=(char *)malloc(sizeof(char)*pkt->length);
@@ -85,19 +87,18 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
     }
    
     // on decode CRC2
-    uint32_t crc2 = ntohl(*((uint32_t *)(data + 12 + pkt_get_length(pkt))));
-    const char *buf = pkt_get_payload(pkt);
+    uint32_t crc2 = ntohl(*((uint32_t *)(data + 12 + ntohs(length))));
     uint32_t new_crc2 = crc32(0L, Z_NULL, 0);
-    new_crc2 = crc32(new_crc2,(const Bytef *) buf, pkt_get_length(pkt));
-    if(crc2 != new_crc2){
+    new_crc2 = crc32(new_crc2,(const Bytef*) data + 12, ntohs(length));
+    if(crc2 != new_crc2)
         return E_CRC;
-    }
     Fonctio = pkt_set_crc2(pkt, crc2);
     
     return Fonctio;
 }
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
+    if(*len>528) fprintf(stderr,"Buffer trop petit encode \n");
     *len=0;
     memcpy(buf+*len, pkt, 2); //header
     *len+=2;
@@ -106,19 +107,20 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     *len+=2;
     memcpy(buf+*len,&(pkt->timestamp),4); //timestamp
     *len+=4;
-    uint32_t crc = htonl(crc32(0, (Bytef*) buf, 8));//crc1
+    uint32_t crc = crc32(0L, Z_NULL, 0);
+    crc = htonl(crc32(crc, (Bytef*) buf, 8));//crc1
     memcpy(buf+*len,&crc,4);
     *len+=4;
     memcpy(buf+12, pkt->payload, pkt->length);
     *len+=pkt->length;
     if(pkt->length>0){
-        crc = htonl(crc32(0, (Bytef*) pkt->payload, pkt->length));
+        crc = crc32(0L, Z_NULL, 0);
+        crc = htonl(crc32(crc, (Bytef*) buf+12, pkt->length));
         memcpy(buf+ *len, &crc, 4);
         *len+=4;
     }
-    
- return PKT_OK;
-}
+
+
 
 ptypes_t pkt_get_type(const pkt_t* pkt)
 {
