@@ -5,6 +5,19 @@
 #include <stdint.h> /* uintx_t */
 #include <zlib.h>
 
+
+struct __attribute__((__packed__)) pkt {
+uint8_t window : 5;
+uint8_t tr : 1;
+uint8_t type : 2; 
+uint8_t seqnum;
+uint16_t length; 
+uint32_t timestamp;
+uint32_t crc1; 
+char *payload;
+uint32_t crc2;
+};
+
 /* Raccourci pour struct pkt */
 typedef struct pkt pkt_t;
 

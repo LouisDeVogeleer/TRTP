@@ -5,6 +5,8 @@
 #include "packet_interface.h"
 #include "socket.h"
 #include <time.h> 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include "queue.h"
 #define WINDOWSIZE 4
@@ -18,7 +20,20 @@ int isIn(int a, int b, int c){
 	  }
 	  return 0;
 	}
-int alreadyQueue(Queue * q, int seqnum);
+	
+int alreadyQueue(Queue * q, int seqnum){
+  if(q->size==0){
+    return 0;
+  }
+  NODE * runner = q->head;
+  int i;
+  for(i=1; i<=q->size; i++){
+    if(pkt_get_seqnum(runner->item) == seqnum){
+      return 1;
+    }
+  }
+  return 0;  
+}
 
 
 int main(int argc, char *argv[]){
@@ -76,7 +91,7 @@ int main(int argc, char *argv[]){
 
 	if(isOutFile == 1){
 	  
-	  wfd = open(file, O_WRONLY|O_CREAT);
+	  wfd = open(file, O_WRONLY|O_CREAT, S_IWUSR);
 	}
 	
 	buffer=NewQueue();
@@ -188,20 +203,4 @@ int main(int argc, char *argv[]){
 	}//fin de la boucle while
 	
 
-}
-	  
-  
-
- alreadyQueue(Queue * q, int seqnum){
-  if(q->size==0){
-    return 0;
-  }
-  NODE * runner = q->head;
-  int i;
-  for(i=1; i<=q->size; i++){
-    if(pkt_get_seqnum(runner->item) == seqnum){
-      return 1;
-    }
-  }
-  return 0;  
 }

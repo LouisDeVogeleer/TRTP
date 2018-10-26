@@ -9,9 +9,9 @@
 #include <sys/select.h>
 #include <fcntl.h>
 
-#include "packet_implem.c"
+//#include "packet_implem.c"
 #include "socket.h"
-#include "queue.c"
+#include "queue.h"
 
 
 
