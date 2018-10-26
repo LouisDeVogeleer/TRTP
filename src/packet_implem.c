@@ -120,7 +120,7 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
         *len+=4;
     }
 
-
+}
 
 ptypes_t pkt_get_type(const pkt_t* pkt)
 {
