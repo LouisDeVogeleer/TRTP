@@ -10,7 +10,7 @@
 struct Queue *buffer;
 
 pkt_t *pkt=NULL;
-int lastack;
+
 #define WINDOWSIZE 4
 int main(int argc, char *argv[]){
   int wfd=1;
@@ -21,6 +21,7 @@ int main(int argc, char *argv[]){
 	char * host = NULL;
 	int port = 0;
 	struct sockaddr_in6 * addr = NULL;
+	int lastack=0;
 	
 	
 	/* Interprétation des arguments */
@@ -78,8 +79,14 @@ int main(int argc, char *argv[]){
 	int expSeqnum=0;
 	while(!eof){//début de la boucle
 	  char *buf[528];
-	  if(inQueue(lastack+1,buffer)){//Si l'element qu'on veut est dans la queue
-	            lastack+=1;
+	  
+	  if(alreadyQueue(buffer,expSeqnum)){//Si l'element qu'on veut est dans la queue
+	            expSeqnum+=1;
+		    lastack+=1;
+		    if(expSeqnum==255){
+		      expSeqnum=0;
+		    }
+		    pkt_set_seqnum(pkt,expSeqnum);
 		    pkt_set_type(pkt, PTYPE_ACK);
 		    size_t longu=pkt_get_length(pkt);
 
@@ -92,59 +99,67 @@ int main(int argc, char *argv[]){
 		    pkt_status_code stat=pkt_encode(pkt,send,&len);
 	    
 	  }// fin du si l'element voulue est dans la queue
-	  ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
-	  if(nbre==0){ //Si on a rien lu
-	    eof=1;
-	  }
-	  else if(nbre<0)//Si une erreur
-	    {
-	      printf("erreur recvfrom");
+	  else{
+	    ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
+	    if(nbre==0){ //Si on a rien lu
+	      eof=1;
 	    }
-	  else{//Si on a lu qqch 
-	    
-	    pkt_status_code verifstat=pkt_decode(&buf,sizeof(buf),pkt);
-	    if(verifstat!=PKT_OK){
-	      printf("Erreur du décodage");
-		}
-	    else{//si on a réussi a le décoder
-	      int seqnum=pkt_get_seqnum(pkt);
-	      if(!alreadyQueue(buffer,seqnum)){//si c'est pas un element deja dans la queue
-
-		if(isIn(lastack+1,WINDOWSIZE-lastack,pkt_get_window(pkt))){//si il est dans l'intervalle de la fenetre recherche
-		
-		  if(pkt_get_window(pkt)==lastack+1){//Si c'est celui attendu
-		    lastack+=1;
-		    pkt_set_type(pkt, PTYPE_ACK);
-		    size_t longu=pkt_get_length(pkt);
-
-		    int err=write(wfd,pkt_get_payload(pkt),longu);//on l'écrit directement dans le fichier
-		    if(err==-1){
-		      printf("erreur ecriture");
-		    }
-		    size_t len=524;
-		    char send[524];
-		    pkt_status_code stat=pkt_encode(pkt,send,&len);
-		    if(stat!=PKT_OK){
-		      printf("erreur encode");
-		    }
-		    pkt_del(pkt);
-		    err=write(sfd,send,len);//Puis on envoye un ACK
-		  }//Fin du si c'est celui attendu
-		  else{//Si c'est pas celui attendu
-		    int b=enqueue(buffer,pkt);//On le rajoute dans la queue
-		    if(b==-1){
-		      printf("erreur enqueue");
-		    }
-
-		  }//fin du else si c'est pas celui attendu
-		}//fin du si il est dans la fenetre attendu
-		  
-	      }//fin du si ce n'est pas un element de la queue
-	    }//fin de si on a reussi a le decoder
+	    else if(nbre<0)//Si une erreur
+	      {
+		printf("erreur recvfrom");
+	      }
+	    else{//Si on a lu qqch 
 	      
-	  }// fin du si on a lu qqch
+	      pkt_status_code verifstat=pkt_decode(&buf,sizeof(buf),pkt);
+	      if(verifstat!=PKT_OK){
+		printf("Erreur du décodage");
+	      }
+	      else{//si on a réussi a le décoder
+		int seqnum=pkt_get_seqnum(pkt);
+		if(!alreadyQueue(buffer,seqnum)){//si c'est pas un element deja dans la queue
+		  if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
+		    
+		    if(isIn(lastack+1,WINDOWSIZE-lastack,pkt_get_window(pkt))){//si il est dans l'intervalle de la fenetre recherche
+		      
+		      if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
+			expSeqnum+=1;
+			lastack+=1;
+			if(expSeqnum==255){
+			  expSeqnum=0;
+			}
+			pkt_set_seqnum(pkt,expSeqnum);
+			pkt_set_type(pkt, PTYPE_ACK);
+			size_t longu=pkt_get_length(pkt);
+			
+			int err=write(wfd,pkt_get_payload(pkt),longu);//on l'écrit directement dans le fichier
+			if(err==-1){
+			  printf("erreur ecriture");
+			}
+			size_t len=528;
+			char send[528];
+			pkt_status_code stat=pkt_encode(pkt,send,&len);
+			if(stat!=PKT_OK){
+			  printf("erreur encode");
+			}
+			pkt_del(pkt);
+			err=write(sfd,send,len);//Puis on envoye un ACK
+		      }//Fin du si c'est celui attendu
+		      else{//Si c'est pas celui attendu
+			int b=enqueue(buffer,pkt);//On le rajoute dans la queue
+			if(b==-1){
+			  printf("erreur enqueue");
+			}
+			
+		      }//fin du else si c'est pas celui attendu
+		    }//fin du si il est dans la fenetre attendu
+		  }//fin du si le seqnum est plus petit on l'ignore
+		}//fin du si ce n'est pas un element de la queue
+	      }//fin de si on a reussi a le decoder
+	      
+	    }// fin du si on a lu qqch
+	  }//Si il n'était pas dans la queue
 	}//fin de la boucle while
-	  
+	
 	int eof = 0;
 	int err;
 	char buff [528];
