@@ -15,7 +15,7 @@ LDFLAGS = -lz
 LDFLAGS += -rdynamic
 
 # Default target
-all: sender receiver 
+all: receiver sender
 
 sender: src/sender.o src/socket.o src/packet_implem.c
 
@@ -28,4 +28,3 @@ receiver: src/receiver.o src/socket.o src/packet_implem.c
 # compile them and link the resulting *.o's into an executable named database
 
 .PHONY: clean
-	
