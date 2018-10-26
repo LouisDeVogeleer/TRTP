@@ -1,5 +1,5 @@
-#ifndef _BUFFER_H
-#define _BUFFER_H
+#ifndef __QUEUE_H_
+#define __QUEUE_H_
 #include <stdlib.h> 
 #include <stdio.h>
 #include "packet_interface.h"
@@ -15,10 +15,13 @@ typedef struct Queue{
 	int size;
 } Queue;
 
-int isEmpty(Queue q);
+Queue * NewQueue();
 
-int enqueue(Queue * q, pkt_t item);
+
+int enqueue(Queue * q, pkt_t * item);
+
+pkt_t * seeTail(Queue * q);
 
 pkt_t * dequeue(Queue * q);
-Queue *NewQueue();
-int alreadyQueue(Queue * q, int seqnum);
+
+#endif

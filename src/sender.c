@@ -4,14 +4,51 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <time.h> 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/select.h>
+#include <fcntl.h>
 
-#include "packet_interface.h"
+#include "packet_implem.c"
 #include "socket.h"
+#include "queue.c"
 
 
 
 uint8_t numSeq = 0 ;
-void sending(int sfd, char* payload, uint16_t length);
+char bufWrite[528];
+int sfd = -1;
+
+pkt_t * createPacket(char * payload, uint16_t length, int window){
+	pkt_t * packet = (pkt_t *) malloc(sizeof(pkt_t));
+	packet=pkt_new();
+	pkt_set_type(packet,PTYPE_DATA);
+	pkt_set_window(packet, window);
+	pkt_set_seqnum(packet, numSeq);
+	pkt_set_timestamp(packet, clock()/CLOCKS_PER_SEC);
+	pkt_set_payload(packet, payload, length);
+	pkt_set_length(packet, length);
+	
+	numSeq ++;
+	if(numSeq == 255){
+		numSeq = 0;
+	}
+	return packet;	
+}
+
+int sendPacket(int fd, pkt_t * packet, size_t dataLen){
+	memset((void*) bufWrite, 0, 528);
+	if(pkt_encode(packet, bufWrite, &dataLen) != PKT_OK){
+		fprintf(stderr, "failed to encode");
+	}  
+	
+	if(write(fd, bufWrite, dataLen)  < 0){
+		perror("failed to write");
+	}
+	return 0;
+}
+		
+
 
 int main(int argc, char *argv[]){
 	int isInFile = 0;         /*  Si = 1, le payload vient de file. Sinon, le payload vient de STDIN.*/
@@ -21,8 +58,10 @@ int main(int argc, char *argv[]){
 	char * host = NULL;
 	int port = 0;
 	struct sockaddr_in6 addr;
+	pkt_t * recPacket = (pkt_t *) malloc(sizeof(pkt_t));
+	uint32_t RTT = 5;
 	
-    /* Interprétation des arguments */
+    /* Interprétation des arguments. */
 	int i;
 	for(i = 1; i < argc; i++){
 		if(isInFile == 0 && strcmp(argv[i], "-f") == 0){
@@ -52,92 +91,150 @@ int main(int argc, char *argv[]){
 		}
 	}
 	
-	/* Creation du socket */
+	/* Creation du socket. */
 	const char *erro=real_address(host, &addr);
 	if(erro != NULL){
-	  return EXIT_FAILURE;
+		fprintf(stderr, "failed to convert adress");
+		return -1;
 	}
-	int sfd=create_socket(NULL, -1, &addr, port);
+	sfd = create_socket(NULL, -1, &addr, port);
 	if(sfd == -1){
-	  return EXIT_FAILURE;
+		fprintf(stderr, "failed to create socket");
+		return -1;
 	}
 	
 	
-	/* Lecture du fichier ou de STDIN et creation des pkt*/
+	/* Lecture du fichier ou de STDIN et creation des pkt. */
 	int err;
-	int eof = 0;
 	int rfd = 0;
-	char * payload;
-	char bufWrite[528];
+	char * payload = NULL;
 	char bufRead[528];
-	fd-set rfds;
-	struct timeval  tv;
-	tv.tv_sec = 5;
-	tv.tv_usec = 0;
+	fd_set rfds;
 	int readRet = 1;
-	isBufferFull =0;
 	pkt_t * newPacket = NULL;
 	int frameN = 0;
 	int maxFrameN = 4;
-
+	int recLastAck = 0;
+	int sentEndPacket = 0;
 	
 	if(isInFile == 1){
 		rfd= open(file, O_RDONLY);
 	}
 	
 	int maxfd = rfd ;
-	if(sfd > rfd) maxfr = sfd ;
+	if(sfd > rfd) maxfd = sfd ;
 	
-	Queue buffer = NewQueue();
+	Queue * q = NewQueue();
 	
-	while(readRet != EOF){
+	//TODO pkt_del les paquets en cas d'erreur
+	while(recLastAck == 0){
+		int currentTime = 0;
+		int lastAck = 0;
+		struct timeval  tv;
+		tv.tv_sec = 5;
+		tv.tv_usec = 0;
+		
 		FD_ZERO(&rfds);
-		FD_SET(sfd &rfds);
+		FD_SET(sfd, &rfds);
 		if(q->size < 3){
 			FD_SET(rfd, &rfds);
 		}
 		
-		err = select(maxfd + 1, &rfds, NULL, NULL);
+		err = select(maxfd + 1, &rfds, NULL, NULL, &tv);
 		
-		if(ret == -1) perror("select");
-		if(ret > 0){
-			/* Acces a la lecture de STDIN ou du fichier d'entree */
-			if(FD_ISSET(rfd, &rfds){
+		if(err== -1) perror("select");
+		if(err > 0){
+			/* Acces a la lecture de STDIN ou du fichier d'entree. */
+			if(FD_ISSET(rfd, &rfds) && sentEndPacket == 0){
 				memset((void*) payload, 0, 512);
-				if(  (readRet =  read(rfd, payload, 512))  > 0){
-					
-					newPacket = createPacket(payload, readRet, frameN % maxFrameN);
+				readRet = read(rfd, payload, 512);
+				
+				/* Creation d'un packet standard. */
+				if(readRet > 0){
+					newPacket = createPacket(payload, readRet, frameN % maxFrameN); //bug check: modulo
 					frameN++;
-					
-					if(enqueue(q, newPacket) == -1){
-						fprintf(stderr, "failed to enqueue newPacket");
-					}
-					
-					int dataLen = readRet + 16;	//verifier si bug				
-					memset((void*) bufWrite, 0, 528);
-					if(pkt_encode(packet, bufWrite, &datLen) != PKT_OK){
-						fprintf(stderr, "failed to encode");
-					}  
-					
-					if(write(sfd, bufWrite, dataLen)  < 0){
-						perror("failed to write on sfd");
-					}
-					
+				}
+				
+				/* Creation du paquet de deconnexion. */
+				else if(readRet == 0){
+					newPacket = pkt_new();
+					pkt_set_payload(newPacket, "", 0); //bug check: voir si bon payload
+					sentEndPacket = 1;
+				}
+				
+				else perror("failed to read input");
+				
+				if(enqueue(q, newPacket) != 0){
+					fprintf(stderr, "failed to enqueue newPacket");
 					pkt_del(newPacket);
+					return -1;
 				}
-				else perror("failed to read input")
+				
+				if(sendPacket(sfd, newPacket, readRet +16) != 0){
+					pkt_del(newPacket);
+					return -1;
+				}		
+				
+				pkt_del(newPacket);
 			}
 			
-			/* Acces a la lecture des donnees du reseau */
-			if(FD_ISSET(sfd, &rfds){
-				memset((void*) bufRead, 0, 528); //vraiment utile 528 pour un ACK
-				if(read(sfd, bufRead, 528){
-					//TODO cas ACK et maj du buffer
-					//TODO cas NACK, quid ?
+			/* Acces a la lecture des donnees du reseau. */
+			if(FD_ISSET(sfd, &rfds)){
+				memset((void*) bufRead, 0, 528); //bug check : 528 vraiment utile pour un ACK ?
+				if((err = read(sfd, bufRead, 528)) > 0){
+					if(pkt_decode((const char *) bufRead, err, recPacket) != PKT_OK){
+						fprintf(stderr, "failed to decode data");
+						//faire autre chose ?
+					}
+					
+					/* ACK */
+					if(pkt_get_type(recPacket) == 2){
+						lastAck = pkt_get_seqnum(recPacket);
+						while(pkt_get_seqnum(seeTail(q)) < lastAck){
+							dequeue(q);
+						}
+						
+						if(pkt_get_timestamp(recPacket) < RTT){
+							RTT = pkt_get_timestamp(recPacket);
+						}
+					}
+					
+					/* NACK */
+					if(pkt_get_type(recPacket) == 3 && q->size!= 0){
+						int sq = pkt_get_seqnum(recPacket);
+						NODE * runner = q->head;
+						for(i=1; i<=q->size; runner = runner->prev){
+							if(pkt_get_seqnum(runner->item) == sq){
+								if(sendPacket(sfd, runner->item, pkt_get_length(runner->item) + 16) != 0){
+									pkt_del(recPacket);
+									return -1;
+								}
+							}
+						}
+					}
+					
+					/* Reception du endPacket. */
+					if(pkt_get_type(recPacket) == 1 && pkt_get_length(recPacket) == 0 && pkt_get_seqnum(recPacket) == lastAck){
+						recLastAck = 1;
+					}
 				}
 			}
 			
-			//TODO checker timer dans la queue et renvoyer si besion
+			/* Verification des timer et renvoi des paquets non-acquites. */
+			currentTime = clock() / CLOCKS_PER_SEC;
+			NODE * runner = q->head;
+			for(i=1; i<=q->size; i++){
+				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 2) ){
+					if(pkt_set_timestamp(runner->item, clock()/CLOCKS_PER_SEC) != PKT_OK){
+						fprintf(stderr, "failed to reset timestamp");
+						return -1;
+					}
+					if(sendPacket(sfd, runner->item, pkt_get_length(runner->item) + 16) != 0){
+						return -1;
+					}
+				}
+				runner = runner->prev;
+			}
 		}
 	}
 	
@@ -145,32 +242,4 @@ int main(int argc, char *argv[]){
 	free(file);
 
 	return 0;
-}
-
-/*
-err = read(0, payload, 512);
-if(err < 0) fprintf(stderr, "Erreur : read de stdin retourne <0");
-if(err == 0) eof = 1;
-sending(sfd, payload, err);
-*/
-
-
-pkt_t * createPacket(char * payload, uint16_t length, window){
-	size_t maxLen = 16 + length;
-	pkt_t * packet = (pkt_t *) malloc(sizeof(pkt_t));
-	packet=pkt_new();
-	pkt_set_type(packet,PTYPE_DATA);
-	pkt_set_window(packet, window);
-	pkt_set_seqnum(packet, numSeq);
-	pkt_set_timestamp(packet, timestamp);
-	pkt_set_payload(packet, payload, length);
-	pkt_set_length(packet, length);
-	
-	if(numSeq == 255){
-		numSeq = 0;
-	}
-	else numSeq++;
-	
-	return packet;	
-}
-			
+}	
