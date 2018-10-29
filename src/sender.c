@@ -19,6 +19,7 @@ uint8_t numSeq = 0 ;
 char bufWrite[528];
 int sfd = -1;
 
+//TODO supprimer champs window et laisser la fonction envoyer le frame number
 pkt_t * createPacket(char * payload, uint16_t length, int window){
 	pkt_t * packet = (pkt_t *) malloc(sizeof(pkt_t));
 	packet=pkt_new();
@@ -193,6 +194,8 @@ int main(int argc, char *argv[]){
 						if(pkt_get_timestamp(recPacket) < RTT){
 							RTT = pkt_get_timestamp(recPacket);
 						}
+
+						//TODO verifier retour du endPacket
 					}
 
 					/* NACK */
