@@ -35,7 +35,29 @@ int alreadyQueue(Queue * q, int seqnum){
   }
   return 0;
 }
-
+void sendAck(pkt_t* pkt){
+ pkt_set_seqnum(pkt,expSeqnum);
+ pkt_set_type(pkt, PTYPE_ACK);
+ size_t len=528;
+ char send[528];
+ pkt_status_code stat=pkt_encode(pkt,send,&len);
+ if(stat!=PKT_OK){
+   fprintf(stderr, "erreur encode\n");
+ }
+ pkt_del(pkt);
+ err=write(sfd,send,len);
+ if(err<0){
+   fprintf(stderr, "erreur write\n");
+ }
+}
+void printPkt(pkt_t* pkt){
+  size_t longu=pkt_get_length(pkt);
+  
+  err=write(wfd,pkt_get_payload(pkt),longu);//on l'écrit directement dans le fichier
+  if(err==-1){
+    printf("erreur ecriture");
+  }
+}
 
 int main(int argc, char *argv[]){
   int wfd=1;
@@ -108,8 +130,8 @@ int main(int argc, char *argv[]){
 	  char *buf[528];
 
 	  if(alreadyQueue(buffer,expSeqnum)){//Si l'element qu'on veut est dans la queue
-			//TODO faire une fonction sendPacket()
-			expSeqnum+=1;
+		        
+	    expSeqnum+=1;
 	    lastack+=1;
 	    if(expSeqnum==255){
 	      expSeqnum=0;
@@ -117,21 +139,8 @@ int main(int argc, char *argv[]){
 	    if(lastack == (WINDOWSIZE-1)){
 	      lastack=0;
 	    }
-			// TODO envoyer le ack au moment ou on le place dans la queue
-	    pkt_set_seqnum(pkt,expSeqnum);
-	    pkt_set_type(pkt, PTYPE_ACK);
-	    size_t longu=pkt_get_length(pkt);
-
-	    err=write(wfd,pkt_get_payload(pkt),longu);//on l'écrit directement dans le fichier
-	    if(err==-1){
-	      fprintf(stderr, "erreur ecriture\n");
-	    }
-	    size_t len=524;
-	    char send[524];
-	    pkt_status_code stat=pkt_encode(pkt,send,&len);
-	    if(stat!=PKT_OK){
-	      fprintf(stderr, "erreur encode\n");
-	    }
+	    //TODO prendre le pkt de la queue
+	    printPkt(pkt);
 		}// fin du si l'element voulue est dans la queue
 	  else{
 			ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
@@ -154,18 +163,8 @@ int main(int argc, char *argv[]){
 								if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
 									//TODO ? verifier si le packet est attendu, sinon le stocker
 									if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
-										eof1=1;
-									  size_t len=528;
-									  char send[528];
-									  pkt_status_code stat=pkt_encode(pkt,send,&len);
-									  if(stat!=PKT_OK){
-									    fprintf(stderr, "erreur encode\n");
-									  }
-									  pkt_del(pkt);
-									  err=write(sfd,send,len);
-									  if(err<0){
-									    fprintf(stderr, "erreur write\n");
-									  }
+									  eof1=1;
+									  sendAck(pkt);
 									}//fin de fin du fichier
 									else{
 										expSeqnum+=1;
@@ -176,22 +175,8 @@ int main(int argc, char *argv[]){
 										if(lastack==WINDOWSIZE-1){
 										  lastack=0;
 										}
-										pkt_set_seqnum(pkt,expSeqnum);
-										pkt_set_type(pkt, PTYPE_ACK);
-										size_t longu=pkt_get_length(pkt);
-
-										err=write(wfd,pkt_get_payload(pkt),longu);//on l'écrit directement dans le fichier
-										if(err==-1){
-										  printf("erreur ecriture");
-										}
-										size_t len=528;
-										char send[528];
-										pkt_status_code stat=pkt_encode(pkt,send,&len);
-										if(stat!=PKT_OK){
-										  fprintf(stderr, "erreur encode\n");
-										}
-										pkt_del(pkt);
-										err=write(sfd,send,len);//Puis on envoye un ACK
+										printPkt(pkt);
+										sendAck(pkt);
 									}
 								}//Fin du si c'est celui attendu
 								else{//Si c'est pas celui attendu
@@ -199,6 +184,7 @@ int main(int argc, char *argv[]){
 									if(b==-1){
 										fprintf(stderr, "erreur enqueue\n");
 									}
+									sendAck(pkt);
 								}//fin du else si c'est pas celui attendu
 							}//fin du si il est dans la fenetre attendu
 						}//fin du si le seqnum est plus petit on l'ignore
