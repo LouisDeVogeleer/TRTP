@@ -22,7 +22,7 @@ int isIn(int a, int b, int c){
 	  return 0;
 	}
 
-int alreadyQueue(Queue * q, int seqnum){
+int alreadyQueue(Queue * q, int seqnum,pkt_t* pkt){
   if(q->size==0){
     return 0;
   }
@@ -30,6 +30,7 @@ int alreadyQueue(Queue * q, int seqnum){
   int i;
   for(i=1; i<=q->size; i++){
     if(pkt_get_seqnum(runner->item) == seqnum){
+      pkt=runner->item;
       return 1;
     }
   }
@@ -128,9 +129,13 @@ int main(int argc, char *argv[]){
 
 	while(!eof1){//début de la boucle
 	  char *buf[528];
-
-	  if(alreadyQueue(buffer,expSeqnum)){//Si l'element qu'on veut est dans la queue
-		        
+	  pkt_t* pkt2=(pkt_t *)malloc(sizeof(pkt_t));
+	  if(pkt2==NULL){
+	    fprintf(stderr,"erreur allocation");
+	      }
+	  if(alreadyQueue(buffer,expSeqnum,pkt2)){//Si l'element qu'on veut est dans la queue
+	    
+	    
 	    expSeqnum+=1;
 	    lastack+=1;
 	    if(expSeqnum==255){
@@ -139,8 +144,9 @@ int main(int argc, char *argv[]){
 	    if(lastack == (WINDOWSIZE-1)){
 	      lastack=0;
 	    }
-	    //TODO prendre le pkt de la queue
-	    printPkt(pkt);
+	   
+	    printPkt(pkt2);
+	    pkt_del(pkt2);
 		}// fin du si l'element voulue est dans la queue
 	  else{
 			ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
@@ -161,7 +167,7 @@ int main(int argc, char *argv[]){
 						if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
 							if(isIn(lastack,WINDOWSIZE-lastack,pkt_get_window(pkt))){//si il est dans l'intervalle de la fenetre recherche
 								if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
-									//TODO ? verifier si le packet est attendu, sinon le stocker
+									
 									if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
 									  eof1=1;
 									  sendAck(pkt);
