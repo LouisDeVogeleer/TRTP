@@ -12,22 +12,23 @@
 
 int real_address(const char *address, struct sockaddr_in6 *rval){
     struct addrinfo * result = NULL;
-    struct addrinfo hints;
+    struct addrinfo * hints = (struct addrinfo *) malloc(sizeof(struct addrinfo));
     memset(&hints, 0, sizeof hints);
-    hints.ai_family =  AF_INET6;
-    hints.ai_socktype = 0;
-    hints.ai_flags = 0;
-    hints.ai_protocol = 0;
-    hints.ai_canonname = NULL;
-    hints.ai_addr = NULL;
-    hints.ai_next = NULL;
-    int a = getaddrinfo(address,NULL, &hints, &result);
+    hints->ai_family =  AF_INET6;
+    hints->ai_socktype = 0;
+    hints->ai_flags = 0;
+    hints->ai_protocol = 0;
+    hints->ai_canonname = NULL;
+    hints->ai_addr = NULL;
+    hints->ai_next = NULL;
+    int a = getaddrinfo(address,NULL, hints, &result);
     if(a!=0){
       return a;
     }
     struct sockaddr_in6 * result1= (struct sockaddr_in6 *)(result->ai_addr);
     *rval=*result1;
     freeaddrinfo(result);
+    free(hints);
     return 0;
 }
 
@@ -53,24 +54,18 @@ int create_socket(struct sockaddr_in6 *source_addr,
             return b;
         }
     }
-    else{
-        fprintf(stderr, "No source arguments.\n");
-    }
 
     if(dest_addr!=NULL && dst_port>0){
         dest_addr->sin6_port = htons(dst_port);
-		fprintf(stderr,"sfd : %d\n", a);
-		fprintf(stderr,"port : %d\n", dst_port);
-		fprintf(stderr,"port of struct : %d\n", dest_addr->sin6_port);
-		fprintf(stderr,"sfd : %d\n", a);
-        int c=connect(a, (struct sockaddr *) dest_addr,(socklen_t) sizeof(struct sockaddr_in6 *));
+		//fprintf(stderr,"sfd : %d\n", a);
+		//fprintf(stderr,"port : %d\n", dst_port);
+		//fprintf(stderr,"port of struct : %d\n", dest_addr->sin6_port);
+		//fprintf(stderr,"sfd : %d\n", a);
+        int c=connect(a, (const struct sockaddr *) dest_addr,(socklen_t) sizeof(struct sockaddr_in6));
         if(c!=0){
-            fprintf(stderr, "ERROR : connect\n");
+            perror("connect");
             return c;
         }
-    }
-    else{
-        fprintf(stderr, "No dest arguments.\n");
     }
 
     return a;
