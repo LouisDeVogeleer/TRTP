@@ -15,8 +15,8 @@
 struct Queue *buffer;
 pkt_t *pkt=NULL;
 int wfd=1;
-int sfd;
-int err;
+int sfd=0;
+int err=0;
 int expSeqnum = 0;
 int isIn(int a, int b, int c){
 	  if(c<=b&&c>=a){
@@ -174,6 +174,9 @@ int main(int argc, char *argv[]){
 			if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
 			  eof1=1;
 			  sendAck(pkt);
+			  free(buffer);
+			  free(pkt);
+			 
 			}//fin de fin du fichier
 			else{
 			  expSeqnum+=1;
