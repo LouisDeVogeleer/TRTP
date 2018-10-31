@@ -9,10 +9,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "queue.h"
-#define WINDOWSIZE 4
+#define WINDOWSIZE 32
 
 
-struct Queue *buffer;
+
 pkt_t *pkt=NULL;
 int wfd=1;
 int sfd=0;
@@ -127,7 +127,11 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	buffer=NewQueue();
+	pkt_t ** buffer=(pkt_t**)malloc(sizeof(pkt_t*)*32);
+	for(i=0;i<32;i++){
+	  buffer[i]=(pkt_t*)malloc(sizeof(pkt_t));
+	  buffer[i]=NULL;
+	}
 	if(buffer==NULL){
 	  fprintf(stderr, "failed to create buffer\n");
 	}
@@ -141,7 +145,7 @@ int main(int argc, char *argv[]){
 	  if(pkt5==NULL){
 	    fprintf(stderr,"erreur allocation");
 	      }
-	  if(alreadyQueue(buffer,expSeqnum,pkt5)){//Si l'element qu'on veut est dans la queue
+	  if(buffer[expSeqnum%WINDOWSIZE]!=NULL){//Si l'element qu'on veut est dans la queue
 	    expSeqnum+=1;
 	    lastack+=1;
 	    if(expSeqnum==255){
@@ -150,6 +154,8 @@ int main(int argc, char *argv[]){
 	    if(lastack == (WINDOWSIZE-1)){
 	      lastack=0;
 	    }
+	    printPkt(buffer[expSeqnum%WINDOWSIZE]);
+	    buffer[expSeqnum%WINDOWSIZE]=NULL;
 	  }// fin du si l'element voulue est dans la queue
 	  else{
 	    ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
@@ -166,13 +172,14 @@ int main(int argc, char *argv[]){
 		//TODO verifier quand il faut un pkt_del(pkt)
 		int seqnum=pkt_get_seqnum(pkt);
 		pkt_t* pkt6=(pkt_t *)malloc(sizeof(pkt_t));
-		if(!alreadyQueue(buffer,seqnum,pkt6)){//si c'est pas un element deja dans la queue
+		if(buffer[expSeqnum%WINDOWSIZE]==NULL){//si c'est pas un element deja dans la queue
 		  if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
-		    if(isIn(lastack,WINDOWSIZE-lastack,pkt_get_window(pkt))){//si il est dans l'intervalle de la fenetre recherche
+		    if(seqnum%WINDOWSIZE<=WINDOWSIZE-1 && seqnum>=0){//si il est dans l'intervalle de la fenetre recherche
 		      if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
 			
 			if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
 			  eof1=1;
+			  pkt_set_type(pkt,1);
 			  sendAck(pkt);
 			  free(buffer);
 			  free(pkt);
@@ -192,10 +199,7 @@ int main(int argc, char *argv[]){
 			}
 		      }//Fin du si c'est celui attendu
 		      else{//Si c'est pas celui attendu
-			int b=enqueue(buffer,pkt);//On le rajoute dans la queue
-			if(b==-1){
-			  fprintf(stderr, "erreur enqueue\n");
-			}
+			buffer[pkt_get_seqnum(pkt)%WINDOWSIZE]=pkt; //On le rajoute dans la queue
 			sendAck(pkt);
 		      }//fin du else si c'est pas celui attendu
 		    }//fin du si il est dans la fenetre attendu
@@ -208,4 +212,8 @@ int main(int argc, char *argv[]){
 	  }//Si il n'était pas dans la queue
 	  pkt_del(pkt5);
 	}//fin de la boucle while
+	for(i=0;i<32;i++){
+	  free(buffer[i]);	  
+	}
+	free(buffer);
 }
