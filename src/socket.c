@@ -48,7 +48,7 @@ int create_socket(struct sockaddr_in6 *source_addr,
         source_addr->sin6_port = htons(src_port);
         int b=bind(a, (struct sockaddr *) source_addr,(socklen_t) sizeof(struct sockaddr_in6));
         if(b!=0){
-            fprintf(stderr, "ERROR : bind\n");
+            perror("bind");
             return b;
         }
     }

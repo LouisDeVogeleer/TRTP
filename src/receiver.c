@@ -21,9 +21,13 @@ int expSeqnum = 0;
 
 void sendAck(pkt_t* pkt3){
   pkt_set_seqnum(pkt3,expSeqnum);
-  if(pkt_get_length(pkt3) > 0){
+  if(pkt_get_length(pkt3) > 0 &&pkt_get_tr(pkt3)==0){
 	  pkt_set_type(pkt3, PTYPE_ACK);
   }
+  if(pkt_get_tr(pkt3)==1){
+	  pkt_set_type(pkt3, PTYPE_NACK);
+  }
+	  
   size_t len=12;
   char send[12];
   pkt_status_code stat=pkt_encode(pkt3,send,&len);
@@ -123,7 +127,7 @@ int main(int argc, char *argv[]){
 
 
   while(!eof1){//début de la boucle
-    char *buf[528];
+    char buf[528];
     if(buffer[expSeqnum%WINDOWSIZE]!=NULL){//Si l'element qu'on veut est dans la queue
       pkt_t * storedPkt = buffer[expSeqnum%WINDOWSIZE];
       if(pkt_get_length(storedPkt)==0 && pkt_get_seqnum(storedPkt)==expSeqnum){ //Si c'est la fin du fichier
@@ -152,6 +156,7 @@ int main(int argc, char *argv[]){
       fprintf(stderr,"nbre recu :%zd\n",nbre);
       if(nbre<0) {//Si une erreur
         fprintf(stderr, "erreur recvfrom\n");
+        return -1;
       }
       int k=connect(sfd, (struct sockaddr *) &addr, solen);
       if(k==-1){
@@ -163,9 +168,9 @@ int main(int argc, char *argv[]){
         }
         pkt = pkt_new();
         pkt_status_code verifstat=pkt_decode((const char*) buf,nbre,pkt);
-        fprintf(stderr, "	length: %d \n", pkt_get_length(pkt));
-        fprintf(stderr, "	seqnum: %d \n", pkt_get_seqnum(pkt));
-        fprintf(stderr, "	expSeqnum: %d \n", expSeqnum);
+		if(pkt_get_tr(pkt)==1 && pkt_get_type(pkt)==1){
+			sendAck(pkt);
+		}
         if(verifstat!=PKT_OK){
           fprintf(stderr, "erreur du décodage1\n");
         }
