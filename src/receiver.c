@@ -123,7 +123,7 @@ int main(int argc, char *argv[]){
 
 
   while(!eof1){//début de la boucle
-    char *buf[528];
+    char buf[528];
     if(buffer[expSeqnum%WINDOWSIZE]!=NULL){//Si l'element qu'on veut est dans la queue
       pkt_t * storedPkt = buffer[expSeqnum%WINDOWSIZE];
       if(pkt_get_length(storedPkt)==0 && pkt_get_seqnum(storedPkt)==expSeqnum){ //Si c'est la fin du fichier
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]){
         }
         printPkt(storedPkt);
       }
-      
+
       sendAck(storedPkt);
       pkt_del(storedPkt);
     }// fin du si l'element voulue est dans le buffer
