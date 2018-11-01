@@ -27,7 +27,9 @@ pkt_t * createPacket(char * payload, uint16_t length){
 	pkt_set_type(packet,PTYPE_DATA);
 	pkt_set_window(packet, seqNum % WINDOWSIZE);
 	pkt_set_seqnum(packet, seqNum);
+	//fprintf(stderr, "	set_timestamp: %li\n", clock()/CLOCKS_PER_SEC);
 	pkt_set_timestamp(packet, clock()/CLOCKS_PER_SEC);
+	//fprintf(stderr, "	get_timestamp in: %d\n", pkt_get_timestamp(packet));
 	pkt_set_payload(packet, payload, length);
 	pkt_set_length(packet, length);
 
@@ -122,8 +124,10 @@ int main(int argc, char *argv[]){
 	if(sfd > rfd) maxfd = sfd ;
 
 	Queue * q = NewQueue();
+	if(q == NULL){
+		fprintf(stderr, "q == NULL");
+	}
 
-	//TODO pkt_del les paquets en cas d'erreur
 	while(recLastAck == 0){
 		int currentTime = 0;
 		int lastAck = 0;
@@ -133,7 +137,7 @@ int main(int argc, char *argv[]){
 
 		FD_ZERO(&rfds);
 		FD_SET(sfd, &rfds);
-		if(q->size < WINDOWSIZE-1){
+		if(q->size < WINDOWSIZE-1 && sentEndPacket == 0){
 			FD_SET(rfd, &rfds);
 		}
 
@@ -143,16 +147,19 @@ int main(int argc, char *argv[]){
 		if(err > 0){
 			/* Acces a la lecture de STDIN ou du fichier d'entree. */
 			if(FD_ISSET(rfd, &rfds) && sentEndPacket == 0){
+				fprintf(stderr, "nouveau paquet !\n");
 				memset((void*) payload, 0, 512);
 				readRet = read(rfd, payload, 512);
+				fprintf(stderr, "caracteres lus: %d\n", readRet);
 
 				/* Creation d'un packet standard. */
-				if(readRet > 0){
+				if(readRet > 1){
 					newPacket = createPacket(payload, readRet);
 				}
 
 				/* Creation du paquet de deconnexion. */
-				else if(readRet == 0){
+				else if(readRet == 1){
+					fprintf(stderr, "fin de journee :D\n");
 					newPacket = pkt_new();
 					pkt_set_payload(newPacket, "", 0); //bug check: voir si bon payload
 					sentEndPacket = 1;
@@ -166,6 +173,11 @@ int main(int argc, char *argv[]){
 					freeQueue(q);
 					return -1;
 				}
+				fprintf(stderr, "	placé dans la queue le seqnum: %d\n", pkt_get_seqnum(newPacket));
+				NODE * runner2 = q->tail;
+				pkt_t* itemtest2 = runner2->item;
+				uint32_t tstest2 = pkt_get_timestamp(itemtest2);
+				fprintf(stderr, "	get_timestamp q: %d\n", tstest2);
 
 				if(sendPacket(sfd, newPacket, readRet +16) != 0){
 					pkt_del(newPacket);
@@ -176,6 +188,7 @@ int main(int argc, char *argv[]){
 
 			/* Acces a la lecture des donnees du reseau. */
 			if(FD_ISSET(sfd, &rfds)){
+				fprintf(stderr, "c'est le facteur !\n");
 				recPacket = pkt_new();
 				memset((void*) bufRead, 0, 528); //bug check : 528 vraiment utile pour un ACK ?
 				if((err = read(sfd, bufRead, 528)) > 0){
@@ -217,11 +230,15 @@ int main(int argc, char *argv[]){
 					}
 					pkt_del(recPacket);
 				}
+				else {
+					fprintf(stderr, "	ah non c'est pour le voisin\n");
+				}
 			}
 
 			/* Verification des timer et renvoi des paquets non-acquites. */
+			fprintf(stderr, "elements dans la queue: %d\n", q->size);
 			currentTime = clock() / CLOCKS_PER_SEC;
-			NODE * runner = q->head;
+			NODE * runner = q->tail;
 			for(i=1; i<=q->size; i++){
 				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 2) ){
 					fprintf(stderr, "clock check\n");

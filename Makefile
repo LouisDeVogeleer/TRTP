@@ -25,6 +25,9 @@ receiver: src/receiver.o src/socket.o src/queue.o src/packet_implem.c
 %: src/%.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
+#test :
+#	gcc -Wall -o testQueue tests/testQueue.c
+
 clean :
 		rm src/*.o
 		rm sender
