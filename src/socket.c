@@ -12,8 +12,7 @@
 
 int real_address(const char *address, struct sockaddr_in6 *rval){
     struct addrinfo * result = NULL;
-    struct addrinfo * hints = (struct addrinfo *) malloc(sizeof(struct addrinfo));
-    memset(&hints, 0, sizeof hints);
+    struct addrinfo * hints = (struct addrinfo *) calloc(1, sizeof(struct addrinfo));
     hints->ai_family =  AF_INET6;
     hints->ai_socktype = 0;
     hints->ai_flags = 0;
