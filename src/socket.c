@@ -12,23 +12,18 @@
 
 int real_address(const char *address, struct sockaddr_in6 *rval){
     struct addrinfo * result = NULL;
-    struct addrinfo * hints = (struct addrinfo *) malloc(sizeof(struct addrinfo));
-    memset(&hints, 0, sizeof hints);
-    hints->ai_family =  AF_INET6;
-    hints->ai_socktype = 0;
-    hints->ai_flags = 0;
-    hints->ai_protocol = 0;
-    hints->ai_canonname = NULL;
-    hints->ai_addr = NULL;
-    hints->ai_next = NULL;
-    int a = getaddrinfo(address,NULL, hints, &result);
+    struct addrinfo hints;
+    hints.ai_family =  AF_INET6;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_protocol = IPPROTO_UDP;
+    int a = getaddrinfo(address,NULL, &hints, &result);
     if(a!=0){
+      freeaddrinfo(result);
       return a;
     }
-    struct sockaddr_in6 * result1= (struct sockaddr_in6 *)(result->ai_addr);
-    *rval=*result1;
+    struct sockaddr_in6 * result1 = (struct sockaddr_in6 *)(result->ai_addr);
+    *rval = *result1;
     freeaddrinfo(result);
-    free(hints);
     return 0;
 }
 

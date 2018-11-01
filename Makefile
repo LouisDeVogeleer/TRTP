@@ -8,6 +8,7 @@ CFLAGS += -Wextra # Enable additional warnings
 CFLAGS += -lm #getopt
 CFLAGS += -O2 -D_FORTIFY_SOURCE=2 # Add canary code, i.e. detect buffer overflows
 CFLAGS += -fstack-protector-all # Add canary code to detect stack smashing
+CFLAGS += -g
 
 # We have no libraries to link against except libc, but we want to keep
 # the symbols for debugging
@@ -24,6 +25,10 @@ receiver: src/receiver.o src/socket.o src/queue.o src/packet_implem.c
 %: src/%.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
+clean :
+		rm src/*.o
+		rm sender
+		rm receiver
 # We use an implicit rule: look for the files record.c/database.c,
 # compile them and link the resulting *.o's into an executable named database
 
