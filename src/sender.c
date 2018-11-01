@@ -112,6 +112,7 @@ int main(int argc, char *argv[]){
 	fd_set rfds;
 	int readRet = 1;
 	pkt_t * newPacket = NULL;
+	int lastAck = 0;
 	int recLastAck = 0;
 	int sentEndPacket = 0;
 
@@ -130,7 +131,6 @@ int main(int argc, char *argv[]){
 
 	while(recLastAck == 0){
 		int currentTime = 0;
-		int lastAck = 0;
 		struct timeval  tv;
 		tv.tv_sec = 5;
 		tv.tv_usec = 0;
@@ -230,6 +230,11 @@ int main(int argc, char *argv[]){
 					}
 
 					/* Reception du endPacket. */
+					fprintf(stderr, "	type: %d\n", pkt_get_type(recPacket));
+					fprintf(stderr, "	length: %d\n", pkt_get_length(recPacket));
+					fprintf(stderr, "	seqnum: %d\n", pkt_get_seqnum(recPacket));
+					fprintf(stderr, "	seqnum of sender: %d\n", seqNum);
+					fprintf(stderr, "	seqnum lastack: %d\n", lastAck);
 					if(pkt_get_type(recPacket) == 1 && pkt_get_length(recPacket) == 0 && pkt_get_seqnum(recPacket) == lastAck){
 						fprintf(stderr, "recu l'ACK du eof\n");
 						recLastAck = 1;

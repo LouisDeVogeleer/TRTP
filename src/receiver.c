@@ -21,7 +21,9 @@ int expSeqnum = 0;
 
 void sendAck(pkt_t* pkt3){
   pkt_set_seqnum(pkt3,expSeqnum);
-  pkt_set_type(pkt3, PTYPE_ACK);
+  if(pkt_get_length(pkt3) > 0){
+	  pkt_set_type(pkt3, PTYPE_ACK);
+  }
   size_t len=12;
   char send[12];
   pkt_status_code stat=pkt_encode(pkt3,send,&len);
@@ -193,7 +195,7 @@ int main(int argc, char *argv[]){
 
                 else{//Si c'est pas celui attendu
                 	  buffer[pkt_get_seqnum(pkt)%WINDOWSIZE]=pkt; //On le rajoute dans la queue
-                    fprintf(stderr, "paquet stocke a l'index: %d\n", pkt_get_seqnum%WINDOWSIZE);
+                    fprintf(stderr, "paquet stocke a l'index: %d\n", pkt_get_seqnum(pkt)%WINDOWSIZE);
                 }//fin du else si c'est pas celui attendu
               }//fin du si il est dans la fenetre attendu
             }//fin du si le seqnum est plus petit on l'ignore
