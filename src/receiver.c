@@ -29,7 +29,7 @@ void sendAck(pkt_t* pkt3){
     fprintf(stderr, "erreur encode\n");
   }
   fprintf(stderr, "envoi du ACK avec seqnum: %d \n", pkt_get_seqnum(pkt3));
- 
+
   //fprintf(stderr, "send: %s\n",send);
   //fprintf(stderr, "len: %zu\n",len);
   //fprintf(stderr, "sfd: %d\n",sfd);
@@ -37,7 +37,7 @@ void sendAck(pkt_t* pkt3){
   if(err<0){
     perror("erreur write ICIII");
   }
- 
+
 }
 void printPkt(pkt_t* pkt4){
   size_t longu=pkt_get_length(pkt4);
@@ -56,7 +56,6 @@ int main(int argc, char *argv[]){
   char * host = NULL;
   int port = 0;
   struct sockaddr_in6 addr;
-  int lastack=0;
 
 
   /* Interprétation des arguments */
@@ -124,97 +123,86 @@ int main(int argc, char *argv[]){
   while(!eof1){//début de la boucle
     char *buf[528];
     if(buffer[expSeqnum%WINDOWSIZE]!=NULL){//Si l'element qu'on veut est dans la queue
-      if(pkt_get_length(buffer[expSeqnum%WINDOWSIZE])==0 && pkt_get_seqnum(buffer[expSeqnum%WINDOWSIZE])==expSeqnum){ //Si c'est la fin du fichier
-	fprintf(stderr,"Arrive ici");
-	eof1=1;
-	pkt_set_type(buffer[expSeqnum%WINDOWSIZE],1);
-	fprintf(stderr,"Packet de fin de fichier reçu");
-			  
-	printPkt(buffer[expSeqnum%WINDOWSIZE]);
-	pkt_del(pkt);	  
+      pkt_t * storedPkt = buffer[expSeqnum%WINDOWSIZE];
+      if(pkt_get_length(storedPkt)==0 && pkt_get_seqnum(storedPkt)==expSeqnum){ //Si c'est la fin du fichier
+        fprintf(stderr,"Arrive ici");
+      	eof1=1;
+      	pkt_set_type(storedPkt,1);
+      	fprintf(stderr,"Packet de fin de fichier reçu");
       }//fin de fin du fichier
-      expSeqnum+=1;
-      lastack+=1;
-      //Expected
-      if(expSeqnum==255){
-	expSeqnum=0;
+
+      else{
+        buffer[expSeqnum%WINDOWSIZE]=NULL;
+        expSeqnum+=1;
+        if(expSeqnum==255){
+          expSeqnum=0;
+        }
+        printPkt(storedPkt);
       }
-      if(lastack == (WINDOWSIZE-1)){
-	lastack=0;
-      }
-      printPkt(buffer[expSeqnum%WINDOWSIZE]);
-      buffer[expSeqnum%WINDOWSIZE]=NULL;
-    }// fin du si l'element voulue est dans la queue
+      
+      sendAck(storedPkt);
+      pkt_del(storedPkt);
+    }// fin du si l'element voulue est dans le buffer
+
     else{
       memset(&buf, 0, 528);
       ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
       fprintf(stderr,"nbre recu :%zd\n",nbre);
       if(nbre<0) {//Si une erreur
-	fprintf(stderr, "erreur recvfrom\n");
+        fprintf(stderr, "erreur recvfrom\n");
       }
-      int k=connect(sfd, (struct sockaddr *) &addr, solen); 
+      int k=connect(sfd, (struct sockaddr *) &addr, solen);
       if(k==-1){
-	fprintf(stderr, "erreur connect\n");
+        fprintf(stderr, "erreur connect\n");
       }
       else{//Si on a lu qqch
-			
-	if(pkt==NULL){
-	  fprintf(stderr,"erreur malloc");
-	}
-	pkt = pkt_new();
-	pkt_status_code verifstat=pkt_decode((const char*) buf,nbre,pkt);
-	//fprintf(stderr, "taille du pkt apres decodage: %d\n", pkt->length);
-	fprintf(stderr, "	length: %d \n", pkt_get_length(pkt));
-	fprintf(stderr, "	seqnum: %d \n", pkt_get_seqnum(pkt));
-	fprintf(stderr, "	expSeqnum: %d \n", expSeqnum);
-	if(verifstat!=PKT_OK){
-			
-	  fprintf(stderr, "erreur du décodage1\n");
-	}
-	else{//si on a réussi a le décoder
-	  //TODO verifier quand il faut un pkt_del(pkt)
-	  int seqnum=pkt_get_seqnum(pkt);
-	  if(buffer[expSeqnum%WINDOWSIZE]==NULL){//si c'est pas un element deja dans la queue
-	    if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
-	      if(seqnum%WINDOWSIZE<=WINDOWSIZE-1 && seqnum>=0){//si il est dans l'intervalle de la fenetre recherche
-		if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
-		  if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
-		    fprintf(stderr,"Arrive ici\n");
-		    eof1=1;
-		    pkt_set_type(pkt,1);
-		    fprintf(stderr,"Packet de fin de fichier reçu \n");
-		    sendAck(pkt);
-		  }//fin de fin du fichier
-		  else{
-		    expSeqnum+=1;
-		    lastack+=1;
-		    if(expSeqnum==255){
-		      expSeqnum=0;
-		    }
-		    if(lastack==WINDOWSIZE-1){
-		      lastack=0;
-		    }	
-		    fprintf(stderr,"Je suis la\n");
-		    printPkt(pkt);
-		    sendAck(pkt);
-		    pkt_del(pkt);
-		  }
-		}//Fin du si c'est celui attendu
-		else{//Si c'est pas celui attendu
-		  buffer[pkt_get_seqnum(pkt)%WINDOWSIZE]=pkt; //On le rajoute dans la queue
-		  fprintf(stderr,"Je suis la aussi\n");
-		  sendAck(pkt);
-		}//fin du else si c'est pas celui attendu
-	      }//fin du si il est dans la fenetre attendu
-	    }//fin du si le seqnum est plus petit on l'ignore
-	  }//fin du si ce n'est pas un element de la queue
+        if(pkt==NULL){
+          fprintf(stderr,"erreur malloc");
+        }
+        pkt = pkt_new();
+        pkt_status_code verifstat=pkt_decode((const char*) buf,nbre,pkt);
+        fprintf(stderr, "	length: %d \n", pkt_get_length(pkt));
+        fprintf(stderr, "	seqnum: %d \n", pkt_get_seqnum(pkt));
+        fprintf(stderr, "	expSeqnum: %d \n", expSeqnum);
+        if(verifstat!=PKT_OK){
+          fprintf(stderr, "erreur du décodage1\n");
+        }
+        else{//si on a réussi a le décoder
+          int seqnum=pkt_get_seqnum(pkt);
+          if(buffer[expSeqnum%WINDOWSIZE]==NULL){//si c'est pas un element deja dans la queue
+            if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
+              if(seqnum%WINDOWSIZE<=WINDOWSIZE-1){//si il est dans l'intervalle de la fenetre recherche
+                if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
+                  if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
+                    fprintf(stderr,"packet eof arrive directement\n");
+                    eof1=1;
+                    pkt_set_type(pkt,1);
+                  }//fin de fin du fichier
 
-	}//fin de si on a reussi a le decoder
+                  else{
+                    expSeqnum+=1;
+                    if(expSeqnum==255){
+                      expSeqnum=0;
+                    }
+
+                    printPkt(pkt);
+                  }
+                  sendAck(pkt);
+                  pkt_del(pkt);
+                }//Fin du si c'est celui attendu
+
+                else{//Si c'est pas celui attendu
+                	  buffer[pkt_get_seqnum(pkt)%WINDOWSIZE]=pkt; //On le rajoute dans la queue
+                    fprintf(stderr, "paquet stocke a l'index: %d\n", pkt_get_seqnum%WINDOWSIZE);
+                }//fin du else si c'est pas celui attendu
+              }//fin du si il est dans la fenetre attendu
+            }//fin du si le seqnum est plus petit on l'ignore
+          }//fin du si ce n'est pas un element de la queue
+        }//fin de si on a reussi a le decoder
       }// fin du si on a lu qqch
     }//Si il n'était pas dans la queue
-
   }//fin de la boucle while
-	
+
   for(i=0;i<32;i++){
     free(buffer[i]);
   }

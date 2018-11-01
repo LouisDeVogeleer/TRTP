@@ -44,9 +44,9 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 		fprintf(stderr,"len: %d\n",ntohs(len));
         return E_LENGTH;
     }
-    
+
     pkt_status_code Fonctio=PKT_OK;
-    
+
     //on encode le type, tr, window
     memcpy(pkt,data,2);
 
@@ -70,26 +70,27 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
         return E_CRC;
     Fonctio = pkt_set_crc1(pkt, crc1);
 
+    if(pkt_get_type(pkt) == 1 && pkt_get_length > 0){
+      //on decode payload
+      if(!pkt_get_tr(pkt)&&pkt_get_length(pkt)>0){
+        pkt->payload=(char *)malloc(sizeof(char)*pkt->length);
+          if(pkt->payload==NULL){
+            return E_NOMEM;
 
-    //on decode payload
-    if(!pkt_get_tr(pkt)&&pkt_get_length(pkt)>0){
-      pkt->payload=(char *)malloc(sizeof(char)*pkt->length);
-        if(pkt->payload==NULL){
-          return E_NOMEM;
+          }
+         memcpy(pkt->payload, data+12, pkt->length);
+      }
 
-        }
-       memcpy(pkt->payload, data+12, pkt->length);
+      // on decode CRC2
+      uint32_t crc2 = ntohl(*((uint32_t *)(data + 12 + ntohs(length))));
+      //fprintf(stderr, "received n_crc2: %d , h_crc2 : %d\n", htonl(crc2), crc2);
+      uint32_t new_crc2 = crc32(0L, Z_NULL, 0);
+      new_crc2 = crc32(new_crc2,(const Bytef*) data + 12, ntohs(length));
+      //fprintf(stderr, "find h_crc2: %d\n", crc2);
+      if(crc2 != new_crc2)
+          return E_CRC;
+      Fonctio = pkt_set_crc2(pkt, crc2);
     }
-
-    // on decode CRC2
-    uint32_t crc2 = ntohl(*((uint32_t *)(data + 12 + ntohs(length))));
-    //fprintf(stderr, "received n_crc2: %d , h_crc2 : %d\n", htonl(crc2), crc2);
-    uint32_t new_crc2 = crc32(0L, Z_NULL, 0);
-    new_crc2 = crc32(new_crc2,(const Bytef*) data + 12, ntohs(length));
-    //fprintf(stderr, "find h_crc2: %d\n", crc2);
-    if(crc2 != new_crc2)
-        return E_CRC;
-    Fonctio = pkt_set_crc2(pkt, crc2);
 
     return Fonctio;
 }
@@ -100,17 +101,17 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 
     if(*len>528) fprintf(stderr,"Buffer trop petit encode \n");
     *len=0;
-    
+
     memcpy(buf+*len, pkt, 2); //header
     *len+=2;
-    
+
     uint16_t e= htons(pkt->length);
     memcpy(buf+*len,&(e), 2); //length
     *len+=2;
-    
+
     memcpy(buf+*len,&(pkt->timestamp),4); //timestamp
     *len+=4;
-    
+
     uint32_t crc = crc32(0L, Z_NULL, 0);
     crc = htonl(crc32(crc, (Bytef*) buf, 8));//crc1
     //fprintf(stderr, "sent h_crc1: %d , n_crc1 : %d\n", ntohl(crc), crc);
