@@ -34,7 +34,7 @@ void sendAck(pkt_t* pkt3){
   if(stat!=PKT_OK){
     fprintf(stderr, "erreur encode\n");
   }
-  fprintf(stderr, "envoi du ACK avec seqnum: %d \n", pkt_get_seqnum(pkt3));
+  //fprintf(stderr, "envoi du ACK avec seqnum: %d \n", pkt_get_seqnum(pkt3));
 
   //fprintf(stderr, "send: %s\n",send);
   //fprintf(stderr, "len: %zu\n",len);
@@ -131,10 +131,10 @@ int main(int argc, char *argv[]){
     if(buffer[expSeqnum%WINDOWSIZE]!=NULL){//Si l'element qu'on veut est dans la queue
       pkt_t * storedPkt = buffer[expSeqnum%WINDOWSIZE];
       if(pkt_get_length(storedPkt)==0 && pkt_get_seqnum(storedPkt)==expSeqnum){ //Si c'est la fin du fichier
-        fprintf(stderr,"Arrive ici");
+        //fprintf(stderr,"Arrive ici");
       	eof1=1;
       	pkt_set_type(storedPkt,1);
-      	fprintf(stderr,"Packet de fin de fichier reçu");
+      	//fprintf(stderr,"Packet de fin de fichier reçu");
       }//fin de fin du fichier
 
       else{
@@ -153,7 +153,7 @@ int main(int argc, char *argv[]){
     else{
       memset(&buf, 0, 528);
       ssize_t nbre= recvfrom(sfd,buf,528,0,(struct sockaddr *)&addr,&solen);
-      fprintf(stderr,"nbre recu :%zd\n",nbre);
+      //fprintf(stderr,"nbre recu :%zd\n",nbre);
       if(nbre<0) {//Si une erreur
         fprintf(stderr, "erreur recvfrom\n");
         return -1;
@@ -181,7 +181,7 @@ int main(int argc, char *argv[]){
               if(seqnum%WINDOWSIZE<=WINDOWSIZE-1){//si il est dans l'intervalle de la fenetre recherche
                 if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
                   if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
-                    fprintf(stderr,"packet eof arrive directement\n");
+                    //fprintf(stderr,"packet eof arrive directement\n");
                     eof1=1;
                     pkt_set_type(pkt,1);
                   }//fin de fin du fichier
@@ -200,7 +200,7 @@ int main(int argc, char *argv[]){
 
                 else{//Si c'est pas celui attendu
                 	  buffer[pkt_get_seqnum(pkt)%WINDOWSIZE]=pkt; //On le rajoute dans la queue
-                    fprintf(stderr, "paquet stocke a l'index: %d\n", pkt_get_seqnum(pkt)%WINDOWSIZE);
+                    //fprintf(stderr, "paquet stocke a l'index: %d\n", pkt_get_seqnum(pkt)%WINDOWSIZE);
                 }//fin du else si c'est pas celui attendu
               }//fin du si il est dans la fenetre attendu
             }//fin du si le seqnum est plus petit on l'ignore
