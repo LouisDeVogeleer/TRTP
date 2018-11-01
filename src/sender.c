@@ -42,10 +42,12 @@ int sendPacket(int fd, pkt_t * packet, size_t dataLen){
 	memset((void*) bufWrite, 0, 528);
 	if(pkt_encode(packet, bufWrite, &dataLen) != PKT_OK){
 		fprintf(stderr, "failed to encode\n");
+		return -1;
 	}
 
 	if(write(fd, bufWrite, dataLen)  < 0){
 		perror("failed to write\n");
+		return -1;
 	}
 	return 0;
 }
@@ -148,8 +150,8 @@ int main(int argc, char *argv[]){
 				fprintf(stderr, "nouveau paquet !\n");
 				memset((void*) payload, 0, 512);
 				readRet = read(rfd, payload, 512);
-				
-				
+
+
 				/* Creation d'un packet standard. */
 				if(readRet > 1){
 					newPacket = createPacket(payload, readRet);
@@ -171,7 +173,7 @@ int main(int argc, char *argv[]){
 					return -1;
 				}
 				//fprintf(stderr, "	placé dans la queue le seqnum: %d\n", pkt_get_seqnum(newPacket));
-				
+
 				fprintf(stderr, "	length: %d \n", pkt_get_length(newPacket));
 				fprintf(stderr, "	seqnum: %d \n", pkt_get_seqnum(newPacket));
 				if(sendPacket(sfd, newPacket, readRet +16) != 0){
@@ -185,13 +187,13 @@ int main(int argc, char *argv[]){
 			if(FD_ISSET(sfd, &rfds)){
 				fprintf(stderr, "c'est le facteur !\n");
 				recPacket = pkt_new();
-				memset((void*) bufRead, 0, 528); 
+				memset((void*) bufRead, 0, 528);
 				if((err = read(sfd, bufRead, 528)) > 0){
 					if(pkt_decode((const char *) bufRead, err, recPacket) != PKT_OK){
 						pkt_del(recPacket);
 						fprintf(stderr, "failed to decode data\n");
 					}
-					
+
 					/* ACK */
 					if(pkt_get_type(recPacket) == 2){
 						lastAck = pkt_get_seqnum(recPacket);
@@ -210,14 +212,20 @@ int main(int argc, char *argv[]){
 					if(pkt_get_type(recPacket) == 3 && q->size!= 0){
 						int sq = pkt_get_seqnum(recPacket);
 						NODE * runner = q->head;
-						for(i=1; i<=q->size; runner = runner->prev){
+						for(i=0; i<q->size; i++){
 							if(pkt_get_seqnum(runner->item) == sq){
+								if(pkt_set_timestamp(runner->item, clock()/CLOCKS_PER_SEC) != PKT_OK){
+									fprintf(stderr, "failed to reset timestamp\n");
+									freeQueue(q);
+									return -1;
+								}
 								if(sendPacket(sfd, runner->item, pkt_get_length(runner->item) + 16) != 0){
 									pkt_del(recPacket);
 									freeQueue(q);
 									return -1;
 								}
 							}
+							runner = runner->prev;
 						}
 					}
 
