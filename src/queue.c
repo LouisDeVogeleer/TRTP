@@ -1,5 +1,5 @@
 #include "queue.h"
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <stdio.h>
 
 
@@ -11,13 +11,23 @@ Queue * NewQueue(){
 	return q;
 }
 
+void freeQueue(Queue * q){
+	if(q == NULL) return;
+	NODE * toFree = NULL;
+	while(q->tail != NULL){
+		toFree = q->tail;
+		q->tail = q->tail->prev;
+		free(toFree);
+	}
+	free(q);
+}
 
 int enqueue(Queue * q, pkt_t * item){
 	NODE * node = (NODE *) malloc(sizeof(NODE));
 	if(node == NULL) return -1;
 	node->item = item;
 	node->prev = NULL;
-	
+
 	if(q->size == 0){
 		q->head = node;
 		q->tail = node;
@@ -36,7 +46,7 @@ pkt_t * dequeue(Queue * q){
 	q->tail = q->tail->prev;
 	free(toFree);
 	q->size --;
-	return item;	
+	return item;
 }
 
 pkt_t * seeTail(Queue * q){

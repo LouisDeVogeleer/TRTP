@@ -23,8 +23,7 @@ int sfd = -1;
 
 
 pkt_t * createPacket(char * payload, uint16_t length){
-	pkt_t * packet = (pkt_t *) malloc(sizeof(pkt_t));
-	packet=pkt_new();
+	pkt_t * packet=pkt_new();
 	pkt_set_type(packet,PTYPE_DATA);
 	pkt_set_window(packet, seqNum % WINDOWSIZE);
 	pkt_set_seqnum(packet, seqNum);
@@ -55,11 +54,10 @@ int sendPacket(int fd, pkt_t * packet, size_t dataLen){
 int main(int argc, char *argv[]){
 	int isInFile = 0;         /*  Si = 1, le payload vient de file. Sinon, le payload vient de STDIN.*/
 	char * file = NULL;
-	//char * payload;
 	char * host = NULL;
 	int port = 0;
 	struct sockaddr_in6 addr;
-	pkt_t * recPacket = (pkt_t *) malloc(sizeof(pkt_t));
+	pkt_t * recPacket = NULL;
 	uint32_t RTT = 5;
 	int err;
 
@@ -93,6 +91,7 @@ int main(int argc, char *argv[]){
 	/* Creation du socket. */
 	memset(&addr, 0, sizeof(struct sockaddr_in6));
 	err=real_address(host, &addr);
+	free(host);
 	if(err != 0){
 		fprintf(stderr, "Error real_adress: %s.\n", gai_strerror(err));
 		return -1;
@@ -106,7 +105,7 @@ int main(int argc, char *argv[]){
 
 	/* Lecture du fichier ou de STDIN et creation des pkt. */
 	int rfd = 0;
-	char * payload = NULL;
+	char payload[512];
 	char bufRead[528];
 	fd_set rfds;
 	int readRet = 1;
@@ -116,6 +115,7 @@ int main(int argc, char *argv[]){
 
 	if(isInFile == 1){
 		rfd= open(file, O_RDONLY);
+		free(file);
 	}
 
 	int maxfd = rfd ;
@@ -163,11 +163,13 @@ int main(int argc, char *argv[]){
 				if(enqueue(q, newPacket) != 0){
 					fprintf(stderr, "failed to enqueue newPacket\n");
 					pkt_del(newPacket);
+					freeQueue(q);
 					return -1;
 				}
 
 				if(sendPacket(sfd, newPacket, readRet +16) != 0){
 					pkt_del(newPacket);
+					freeQueue(q);
 					return -1;
 				}
 
@@ -176,6 +178,7 @@ int main(int argc, char *argv[]){
 
 			/* Acces a la lecture des donnees du reseau. */
 			if(FD_ISSET(sfd, &rfds)){
+				recPacket = pkt_new();
 				memset((void*) bufRead, 0, 528); //bug check : 528 vraiment utile pour un ACK ?
 				if((err = read(sfd, bufRead, 528)) > 0){
 					if(pkt_decode((const char *) bufRead, err, recPacket) != PKT_OK){
@@ -203,6 +206,7 @@ int main(int argc, char *argv[]){
 							if(pkt_get_seqnum(runner->item) == sq){
 								if(sendPacket(sfd, runner->item, pkt_get_length(runner->item) + 16) != 0){
 									pkt_del(recPacket);
+									freeQueue(q);
 									return -1;
 								}
 							}
@@ -224,9 +228,11 @@ int main(int argc, char *argv[]){
 				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 2) ){
 					if(pkt_set_timestamp(runner->item, clock()/CLOCKS_PER_SEC) != PKT_OK){
 						fprintf(stderr, "failed to reset timestamp\n");
+						freeQueue(q);
 						return -1;
 					}
 					if(sendPacket(sfd, runner->item, pkt_get_length(runner->item) + 16) != 0){
+						freeQueue(q);
 						return -1;
 					}
 				}
@@ -235,8 +241,6 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	free(host);
-	free(file);
-
+	freeQueue(q);
 	return 0;
 }

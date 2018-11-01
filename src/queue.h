@@ -1,6 +1,6 @@
 #ifndef __QUEUE_H_
 #define __QUEUE_H_
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <stdio.h>
 #include "packet_interface.h"
 
@@ -17,6 +17,7 @@ typedef struct Queue{
 
 Queue * NewQueue();
 
+void freeQueue(Queue * q);
 
 int enqueue(Queue * q, pkt_t * item);
 
