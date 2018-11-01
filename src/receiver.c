@@ -39,7 +39,7 @@ int alreadyQueue(Queue * q, int seqnum,pkt_t* pkt2){
       pkt2=runner->item;
       return 1;
     }
-    
+
   }
   return 0;
 }
@@ -60,7 +60,7 @@ void sendAck(pkt_t* pkt3){
 }
 void printPkt(pkt_t* pkt4){
   size_t longu=pkt_get_length(pkt4);
-  
+
   err=write(wfd,pkt_get_payload(pkt4),longu);//on l'écrit directement dans le fichier
   if(err==-1){
     printf("erreur ecriture");
@@ -69,13 +69,13 @@ void printPkt(pkt_t* pkt4){
 }
 
 int main(int argc, char *argv[]){
-  
+
 	int isOutFile = 0;         /*  Si = 1, le payload ira vers file. Sinon, le payload vient de STDOUT.*/
 	char * file = NULL;
 	//char * payload;
 	char * host = NULL;
 	int port = 0;
-	struct sockaddr_in6 * addr = NULL;
+	struct sockaddr_in6 addr;
 	int lastack=0;
 
 
@@ -107,12 +107,12 @@ int main(int argc, char *argv[]){
 	}
 
 	/* Creation du socket */
-	 err = real_address(host,addr);
+	err = real_address(host,&addr);
 	if(err != 0){
 		fprintf(stderr, "Error real_adress: %s.\n", gai_strerror(err));
 	  return -1;
 	}
-        sfd=create_socket(addr,port,NULL,-1);
+	sfd=create_socket(&addr,port,NULL,-1);
 	if(sfd<-1){
 		fprintf(stderr, "Error create_socket.\n");
 	  return -1;
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]){
 	}
 	socklen_t solen = sizeof(struct sockaddr_in6);
 	int eof1 = 0;
-	
+
 
 	while(!eof1){//début de la boucle
 	  char *buf[528];
@@ -176,14 +176,14 @@ int main(int argc, char *argv[]){
 		  if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
 		    if(seqnum%WINDOWSIZE<=WINDOWSIZE-1 && seqnum>=0){//si il est dans l'intervalle de la fenetre recherche
 		      if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
-			
+
 			if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
 			  eof1=1;
 			  pkt_set_type(pkt,1);
 			  sendAck(pkt);
 			  free(buffer);
 			  free(pkt);
-			 
+
 			}//fin de fin du fichier
 			else{
 			  expSeqnum+=1;
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]){
 	  pkt_del(pkt5);
 	}//fin de la boucle while
 	for(i=0;i<32;i++){
-	  free(buffer[i]);	  
+	  free(buffer[i]);
 	}
 	free(buffer);
 }

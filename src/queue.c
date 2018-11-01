@@ -44,6 +44,7 @@ pkt_t * dequeue(Queue * q){
 	pkt_t * item = q->tail->item;
 	NODE * toFree = q->tail;
 	q->tail = q->tail->prev;
+	pkt_del(toFree->item);
 	free(toFree);
 	q->size --;
 	return item;

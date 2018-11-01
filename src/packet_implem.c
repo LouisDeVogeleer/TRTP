@@ -28,7 +28,7 @@ return new;
 }
 
 void pkt_del(pkt_t *pkt)
-{       
+{
     if (pkt->payload != NULL){
         free(pkt->payload);
         free(pkt);
@@ -45,61 +45,63 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
     ptypes_t type=data[0] >>6;
     pkt_status_code Fonctio=PKT_OK;
     Fonctio=pkt_set_type(pkt,type);
-      
+
     //On encode le tr
     uint8_t tr=(data[0]<<2)>>6;
     Fonctio=pkt_set_tr(pkt,tr);
-    
+
     //On encode la fenetre
     uint8_t window=data[0]&0b00011111 ;
     Fonctio=pkt_set_window(pkt,window);
-    
+
     //on encode le Seqnum
     Fonctio=pkt_set_seqnum(pkt,data[1]);
-    
+
     //on encode la taille
     uint16_t length;
     memcpy(&length, data+2*sizeof(uint8_t), sizeof(uint16_t));
     Fonctio=pkt_set_length(pkt,htons(length));
-    
+
     //on encode timestamp
     uint32_t timestamp;
     memcpy(&timestamp, data+4*sizeof(uint8_t), sizeof(uint32_t));//tester sans les sizeof juste int et donc au lieu de 32, on mets 4
     Fonctio=pkt_set_timestamp(pkt,timestamp);
-    
+
     // on decode CRC1
     uint32_t crc1 = ntohl(*((uint32_t *)(data + 8)));
-	fprintf(stderr, "received n_crc1: %d , h_crc1 : %d\n", htonl(crc1), crc1);
+    fprintf(stderr, "received n_crc1: %d , h_crc1 : %d\n", htonl(crc1), crc1);
     uint32_t new_crc1 = crc32(0L, Z_NULL, 0);
     new_crc1 = crc32(new_crc1,(const Bytef*) data, 8);
-	fprintf(stderr, "find h_crc1: %d", crc1);
+    fprintf(stderr, "find h_crc1: %d", crc1);
     if(crc1 != new_crc1)
         return E_CRC;
     Fonctio = pkt_set_crc1(pkt, crc1);
-        
-    
+
+
     //on decode payload
     if(!pkt_get_tr(pkt)&&pkt_get_length(pkt)>0){
-         pkt->payload=(char *)malloc(sizeof(char)*pkt->length);
+      pkt->payload=(char *)malloc(sizeof(char)*pkt->length);
         if(pkt->payload==NULL){
-            return E_NOMEM;
-            
+          return E_NOMEM;
+
         }
        memcpy(pkt->payload, data+12, pkt->length);
     }
-   
+
     // on decode CRC2
     uint32_t crc2 = ntohl(*((uint32_t *)(data + 12 + ntohs(length))));
-	fprintf(stderr, "received n_crc2: %d , h_crc2 : %d\n", htonl(crc2), crc2);
+    fprintf(stderr, "received n_crc2: %d , h_crc2 : %d\n", htonl(crc2), crc2);
     uint32_t new_crc2 = crc32(0L, Z_NULL, 0);
     new_crc2 = crc32(new_crc2,(const Bytef*) data + 12, ntohs(length));
-	fprintf(stderr, "find h_crc2: %d", crc2);
+    fprintf(stderr, "find h_crc2: %d", crc2);
     if(crc2 != new_crc2)
         return E_CRC;
     Fonctio = pkt_set_crc2(pkt, crc2);
-    
+
     return Fonctio;
 }
+
+
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
     if(*len>528) fprintf(stderr,"Buffer trop petit encode \n");
@@ -113,7 +115,7 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     *len+=4;
     uint32_t crc = crc32(0L, Z_NULL, 0);
     crc = htonl(crc32(crc, (Bytef*) buf, 8));//crc1
-	fprintf(stderr, "sent h_crc1: %d , n_crc1 : %d\n", ntohl(crc), crc);
+    fprintf(stderr, "sent h_crc1: %d , n_crc1 : %d\n", ntohl(crc), crc);
     memcpy(buf+*len,&crc,4);
     *len+=4;
     memcpy(buf+12, pkt->payload, pkt->length);
@@ -121,10 +123,11 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     if(pkt->length>0){
         crc = crc32(0L, Z_NULL, 0);
         crc = htonl(crc32(crc, (Bytef*) buf+12, pkt->length));
-		fprintf(stderr, "sent h_crc2: %d , n_crc2 : %d\n", ntohl(crc), crc);
+        fprintf(stderr, "sent h_crc2: %d , n_crc2 : %d\n", ntohl(crc), crc);
         memcpy(buf+ *len, &crc, 4);
         *len+=4;
     }
+    return PKT_OK;
 
 }
 
@@ -185,7 +188,7 @@ pkt_status_code pkt_set_type(pkt_t *pkt, const ptypes_t type)
 pkt_status_code pkt_set_tr(pkt_t *pkt, const uint8_t tr)
 {
     if (tr!= 1 && tr!=0){
-        
+
         return E_TR;
     }
     pkt->tr = tr;
@@ -243,14 +246,14 @@ pkt_status_code pkt_set_payload(pkt_t *pkt, const char *data, const uint16_t len
         return E_NOMEM;
     }
     if (pkt->payload!=NULL){
-        
+
         free(pkt->payload);
-    } 
+    }
     pkt->payload = (char *) malloc(length);
     if (pkt->payload == NULL){
         printf("Erreur Set Payload alloc");
         return E_NOMEM;
-    } 
+    }
     memcpy(pkt->payload, data, length);
     pkt_set_length(pkt,length);
     return PKT_OK;

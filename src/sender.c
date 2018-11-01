@@ -41,11 +41,11 @@ pkt_t * createPacket(char * payload, uint16_t length){
 int sendPacket(int fd, pkt_t * packet, size_t dataLen){
 	memset((void*) bufWrite, 0, 528);
 	if(pkt_encode(packet, bufWrite, &dataLen) != PKT_OK){
-		fprintf(stderr, "failed to encode");
+		fprintf(stderr, "failed to encode\n");
 	}
 
 	if(write(fd, bufWrite, dataLen)  < 0){
-		perror("failed to write");
+		perror("failed to write\n");
 	}
 	return 0;
 }
@@ -172,8 +172,6 @@ int main(int argc, char *argv[]){
 					freeQueue(q);
 					return -1;
 				}
-
-				pkt_del(newPacket);
 			}
 
 			/* Acces a la lecture des donnees du reseau. */
@@ -225,6 +223,7 @@ int main(int argc, char *argv[]){
 			currentTime = clock() / CLOCKS_PER_SEC;
 			NODE * runner = q->head;
 			for(i=1; i<=q->size; i++){
+				fprintf(stderr, "pkt_get_timestamp in clock check: %d", pkt_get_timestamp(runner->item));
 				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 2) ){
 					if(pkt_set_timestamp(runner->item, clock()/CLOCKS_PER_SEC) != PKT_OK){
 						fprintf(stderr, "failed to reset timestamp\n");
