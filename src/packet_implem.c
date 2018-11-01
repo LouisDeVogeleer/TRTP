@@ -116,19 +116,15 @@ pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
     //fprintf(stderr, "sent h_crc1: %d , n_crc1 : %d\n", ntohl(crc), crc);
     memcpy(buf+*len,&crc,4);
     *len+=4;
-    
-    memcpy(buf+12, pkt->payload, pkt->length);
-    
-    *len+=pkt->length;
-    
-    if(pkt->length>0){
+    if(pkt_get_type(pkt) == 1 && pkt_get_length > 0){
+		memcpy(buf+12, pkt->payload, pkt->length);
+		*len+=pkt->length;
         crc = crc32(0L, Z_NULL, 0);
         crc = htonl(crc32(crc, (Bytef*) buf+12, pkt->length));
         //fprintf(stderr, "sent h_crc2: %d , n_crc2 : %d\n", ntohl(crc), crc);
         memcpy(buf+ *len, &crc, 4);
         *len+=4;
-    }
-    
+	}
     return PKT_OK;
 
 }

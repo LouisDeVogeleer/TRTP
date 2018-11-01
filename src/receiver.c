@@ -22,10 +22,8 @@ int expSeqnum = 0;
 void sendAck(pkt_t* pkt3){
  pkt_set_seqnum(pkt3,expSeqnum);
  pkt_set_type(pkt3, PTYPE_ACK);
- pkt_set_window(pkt3,(uint8_t)7);
- size_t len=pkt3->length;
- char send[16+pkt->length];
- //fprintf(stderr, "taille send: %lu\n",sizeof(send) / sizeof(char));
+ size_t len=12;
+ char send[12];
  pkt_status_code stat=pkt_encode(pkt3,send,&len);
  if(stat!=PKT_OK){
    fprintf(stderr, "erreur encode\n");
@@ -48,11 +46,10 @@ void printPkt(pkt_t* pkt4){
   if(err==-1){
     printf("erreur ecriture");
   }
-  pkt_del(pkt4);
 }
 
 int main(int argc, char *argv[]){
-
+	pkt=pkt_new();
 	int isOutFile = 0;         /*  Si = 1, le payload ira vers file. Sinon, le payload vient de STDOUT.*/
 	char * file = NULL;
 	//char * payload;
@@ -133,7 +130,8 @@ int main(int argc, char *argv[]){
 			  pkt_set_type(buffer[expSeqnum%WINDOWSIZE],1);
 			  fprintf(stderr,"Packet de fin de fichier reçu");
 			  
-			  sendAck(buffer[expSeqnum%WINDOWSIZE]);
+			  printPkt(buffer[expSeqnum%WINDOWSIZE]);
+			  pkt_del(pkt);
 			  
 
 			}//fin de fin du fichier
@@ -160,10 +158,11 @@ int main(int argc, char *argv[]){
 			fprintf(stderr, "erreur connect\n");
 			}
 	    else{//Si on a lu qqch
-			pkt=pkt_new();
+			
 			if(pkt==NULL){
 				fprintf(stderr,"erreur malloc");
 			}
+			pkt = pkt_new();
 	      pkt_status_code verifstat=pkt_decode((const char*) buf,nbre,pkt);
 	      //fprintf(stderr, "taille du pkt apres decodage: %d\n", pkt->length);
 	      fprintf(stderr, "	length: %d \n", pkt_get_length(pkt));
@@ -180,42 +179,31 @@ int main(int argc, char *argv[]){
 		  if(seqnum>=expSeqnum){//Si le seqnum est plus petit que celui attendu on l'ignore
 		    if(seqnum%WINDOWSIZE<=WINDOWSIZE-1 && seqnum>=0){//si il est dans l'intervalle de la fenetre recherche
 		      if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
-
-			if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
-			  fprintf(stderr,"Arrive ici\n");
-			  eof1=1;
-			  pkt_set_type(pkt,1);
-			  fprintf(stderr,"Packet de fin de fichier reçu \n");
-			  
-			  sendAck(pkt);
-			  
-
-			}//fin de fin du fichier
-			else{
-			  expSeqnum+=1;
-			  lastack+=1;
-			  if(expSeqnum==255){
-			    expSeqnum=0;
-			  }
-			  if(lastack==WINDOWSIZE-1){
-			    lastack=0;
-			  }
-			  //fprintf(stderr,"Je suis ici\n");
-			  printPkt(pkt);
-			  if(nbre<16){
-				  pkt_set_length(pkt,nbre-12);
-			  }
-			  else{
-			  pkt_set_length(pkt,nbre-16);
-				}
-			  //fprintf(stderr,"Je suis la\n");
-			  sendAck(pkt);
-			  
-			  
-			}
-		      }//Fin du si c'est celui attendu
+				if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
+					fprintf(stderr,"Arrive ici\n");
+					eof1=1;
+					pkt_set_type(pkt,1);
+					fprintf(stderr,"Packet de fin de fichier reçu \n");
+					sendAck(pkt);
+				}//fin de fin du fichier
+				else{
+					expSeqnum+=1;
+					lastack+=1;
+					if(expSeqnum==255){
+						expSeqnum=0;
+					}
+					if(lastack==WINDOWSIZE-1){
+						lastack=0;
+					}	
+					fprintf(stderr,"Je suis la\n");
+					printPkt(pkt);
+					sendAck(pkt);
+					pkt_del(pkt);
+					}
+				}//Fin du si c'est celui attendu
 		      else{//Si c'est pas celui attendu
 					buffer[pkt_get_seqnum(pkt)%WINDOWSIZE]=pkt; //On le rajoute dans la queue
+					fprintf(stderr,"Je suis la aussi\n");
 					sendAck(pkt);
 		      }//fin du else si c'est pas celui attendu
 		    }//fin du si il est dans la fenetre attendu
@@ -223,7 +211,6 @@ int main(int argc, char *argv[]){
 		}//fin du si ce n'est pas un element de la queue
 
 	      }//fin de si on a reussi a le decoder
-	      pkt_del(pkt);
 	    }// fin du si on a lu qqch
 	  }//Si il n'était pas dans la queue
 
