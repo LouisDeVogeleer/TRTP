@@ -39,7 +39,7 @@ void pkt_del(pkt_t *pkt)
 pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 {
     if(len>528){
-		fprintf(stderr,"len: %d\n",len);
+		fprintf(stderr,"len: %zd\n",len);
 		fprintf(stderr,"len: %d\n",htons(len));
 		fprintf(stderr,"len: %d\n",ntohs(len));
         return E_LENGTH;
@@ -107,39 +107,39 @@ pkt_status_code pkt_decode(const char *data, const size_t len, pkt_t *pkt)
 
 pkt_status_code pkt_encode(const pkt_t* pkt, char *buf, size_t *len)
 {
-	fprintf(stderr,"len encode :%d\n",*len);
+	fprintf(stderr,"len encode :%zd\n",*len);
     if(*len>528) fprintf(stderr,"Buffer trop petit encode \n");
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     *len=0;
     memcpy(buf+*len, pkt, 2); //header
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     *len+=2;
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     uint16_t e= htons(pkt->length);
     memcpy(buf+*len,&(e), 2); //length
     *len+=2;
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     memcpy(buf+*len,&(pkt->timestamp),4); //timestamp
     *len+=4;
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     uint32_t crc = crc32(0L, Z_NULL, 0);
     crc = htonl(crc32(crc, (Bytef*) buf, 8));//crc1
     fprintf(stderr, "sent h_crc1: %d , n_crc1 : %d\n", ntohl(crc), crc);
     memcpy(buf+*len,&crc,4);
     *len+=4;
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     memcpy(buf+12, pkt->payload, pkt->length);
     *len+=pkt->length;
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     if(pkt->length>0){
         crc = crc32(0L, Z_NULL, 0);
         crc = htonl(crc32(crc, (Bytef*) buf+12, pkt->length));
         fprintf(stderr, "sent h_crc2: %d , n_crc2 : %d\n", ntohl(crc), crc);
         memcpy(buf+ *len, &crc, 4);
         *len+=4;
-        fprintf(stderr,"len encode :%d\n",*len);
+        fprintf(stderr,"len encode :%zd\n",*len);
     }
-    fprintf(stderr,"len encode :%d\n",*len);
+    fprintf(stderr,"len encode :%zd\n",*len);
     return PKT_OK;
 
 }

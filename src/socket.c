@@ -18,11 +18,6 @@ int real_address(const char *address, struct sockaddr_in6 *rval){
     hints.ai_socktype = SOCK_DGRAM;
     hints.ai_protocol = IPPROTO_UDP;
 
-    //hints.ai_addrlen = 0;
-    //hints.ai_addr = NULL;
-    //hints.ai_canonname = NULL;
-    //hints.ai_next = NULL;
-
     int a = getaddrinfo(address,NULL, &hints, &result);
     if(a!=0){
       printf("getaddrinfo return : %d\n", a);

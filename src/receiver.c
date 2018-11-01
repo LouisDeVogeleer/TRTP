@@ -116,7 +116,7 @@ int main(int argc, char *argv[]){
 
 
 	while(!eof1){//début de la boucle
-	  char *buf[528];
+	  char buf[528];
 	  if(buffer[expSeqnum%WINDOWSIZE]!=NULL){//Si l'element qu'on veut est dans la queue
 	    expSeqnum+=1;
 	    lastack+=1;
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]){
 			  eof1=1;
 			  pkt_set_type(pkt,1);
 			  sendAck(pkt);
-			  
+
 
 			}//fin de fin du fichier
 			else{
@@ -174,8 +174,8 @@ int main(int argc, char *argv[]){
 			  }
 			  printPkt(pkt);
 			  sendAck(pkt);
-			  
-			  
+
+
 			}
 		      }//Fin du si c'est celui attendu
 		      else{//Si c'est pas celui attendu
