@@ -67,9 +67,9 @@ int main(int argc, char *argv[]){
 		if(isInFile == 0 && strcmp(argv[i], "-f") == 0){
 			isInFile = 1;
 			int lenfile = strlen(argv[i+1]);
-			file = (char *) malloc(lenfile*sizeof(char));
+			file = (char *) malloc((1+lenfile)*sizeof(char));
 			int j;
-			for(j=0; j<lenfile; j++){
+			for(j=0; j<=lenfile; j++){
 				file[j] = argv[i+1][j];
 			}
 			i++;
@@ -77,9 +77,9 @@ int main(int argc, char *argv[]){
 
 		else if(host == NULL) {
 			int lenhost = strlen(argv[i]);
-			host = (char *) malloc(lenhost*sizeof(char));
+			host = (char *) malloc((1+lenhost)*sizeof(char));
 			int j;
-			for(j=0; j<lenhost; j++){
+			for(j=0; j<=lenhost; j++){
 				host[j] = argv[i][j];
 				}
 		}
@@ -223,8 +223,11 @@ int main(int argc, char *argv[]){
 			currentTime = clock() / CLOCKS_PER_SEC;
 			NODE * runner = q->head;
 			for(i=1; i<=q->size; i++){
-				fprintf(stderr, "pkt_get_timestamp in clock check: %d", pkt_get_timestamp(runner->item));
 				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 2) ){
+					fprintf(stderr, "clock check\n");
+					fprintf(stderr, "   currentTime: %d\n", currentTime);
+					fprintf(stderr, "   get_timestamp: %d\n", pkt_get_timestamp(runner->item));
+					fprintf(stderr, "   RTT: %d\n", RTT);
 					if(pkt_set_timestamp(runner->item, clock()/CLOCKS_PER_SEC) != PKT_OK){
 						fprintf(stderr, "failed to reset timestamp\n");
 						freeQueue(q);
