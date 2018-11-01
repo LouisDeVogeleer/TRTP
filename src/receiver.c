@@ -20,23 +20,23 @@ int err=0;
 int expSeqnum = 0;
 
 void sendAck(pkt_t* pkt3){
- pkt_set_seqnum(pkt3,expSeqnum);
- pkt_set_type(pkt3, PTYPE_ACK);
- size_t len=12;
- char send[12];
- pkt_status_code stat=pkt_encode(pkt3,send,&len);
- if(stat!=PKT_OK){
-   fprintf(stderr, "erreur encode\n");
- }
- fprintf(stderr, "envoi du ACK avec seqnum: %d \n", pkt_get_seqnum(pkt3));
+  pkt_set_seqnum(pkt3,expSeqnum);
+  pkt_set_type(pkt3, PTYPE_ACK);
+  size_t len=12;
+  char send[12];
+  pkt_status_code stat=pkt_encode(pkt3,send,&len);
+  if(stat!=PKT_OK){
+    fprintf(stderr, "erreur encode\n");
+  }
+  fprintf(stderr, "envoi du ACK avec seqnum: %d \n", pkt_get_seqnum(pkt3));
  
- //fprintf(stderr, "send: %s\n",send);
- //fprintf(stderr, "len: %zu\n",len);
- //fprintf(stderr, "sfd: %d\n",sfd);
- err=write(sfd,send,len);
- if(err<0){
-   perror("erreur write ICIII");
- }
+  //fprintf(stderr, "send: %s\n",send);
+  //fprintf(stderr, "len: %zu\n",len);
+  //fprintf(stderr, "sfd: %d\n",sfd);
+  err=write(sfd,send,len);
+  if(err<0){
+    perror("erreur write ICIII");
+  }
  
 }
 void printPkt(pkt_t* pkt4){
@@ -131,12 +131,11 @@ int main(int argc, char *argv[]){
 	fprintf(stderr,"Packet de fin de fichier reçu");
 			  
 	printPkt(buffer[expSeqnum%WINDOWSIZE]);
-	pkt_del(pkt);
-			  
-
+	pkt_del(pkt);	  
       }//fin de fin du fichier
       expSeqnum+=1;
       lastack+=1;
+      //Expected
       if(expSeqnum==255){
 	expSeqnum=0;
       }
