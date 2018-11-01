@@ -17,6 +17,7 @@ LDFLAGS += -rdynamic
 
 # Default target
 all: receiver sender
+	clear
 
 sender: src/sender.o src/socket.o src/queue.o src/packet_implem.c
 

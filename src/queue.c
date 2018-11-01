@@ -51,5 +51,8 @@ pkt_t * dequeue(Queue * q){
 }
 
 pkt_t * seeTail(Queue * q){
+	if(q->tail == NULL){
+		return NULL;
+	}
 	return q->tail->item;
 }

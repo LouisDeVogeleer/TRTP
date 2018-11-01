@@ -22,20 +22,24 @@ int expSeqnum = 0;
 void sendAck(pkt_t* pkt3){
  pkt_set_seqnum(pkt3,expSeqnum);
  pkt_set_type(pkt3, PTYPE_ACK);
- size_t len=528;
- char send[528];
+ pkt_set_window(pkt3,(uint8_t)7);
+ size_t len=pkt3->length;
+ char send[16+pkt->length];
+ //fprintf(stderr, "taille send: %lu\n",sizeof(send) / sizeof(char));
  pkt_status_code stat=pkt_encode(pkt3,send,&len);
  if(stat!=PKT_OK){
    fprintf(stderr, "erreur encode\n");
  }
- pkt_del(pkt3);
- fprintf(stderr, "send: %s\n",send);
- fprintf(stderr, "len: %zu\n",len);
- fprintf(stderr, "sfd: %d\n",sfd);
+ fprintf(stderr, "envoi du ACK avec seqnum: %d \n", pkt_get_seqnum(pkt3));
+ 
+ //fprintf(stderr, "send: %s\n",send);
+ //fprintf(stderr, "len: %zu\n",len);
+ //fprintf(stderr, "sfd: %d\n",sfd);
  err=write(sfd,send,len);
  if(err<0){
-   fprintf(stderr, "erreur write ICIIII\n");
+   perror("erreur write ICIII");
  }
+ 
 }
 void printPkt(pkt_t* pkt4){
   size_t longu=pkt_get_length(pkt4);
@@ -65,8 +69,8 @@ int main(int argc, char *argv[]){
 		if(isOutFile == 0 && strcmp(argv[i], "-f") == 0){
 			isOutFile = 1;
 			int lenfile = strlen(argv[i+1]);
-			file = (char *) malloc(lenfile*sizeof(char));
-			for(int j=0; j<lenfile; j++){
+			file = (char *) malloc((1+lenfile)*sizeof(char));
+			for(int j=0; j<=lenfile; j++){
 				file[j] = argv[i+1][j];
 			}
 			i++;
@@ -74,9 +78,9 @@ int main(int argc, char *argv[]){
 
 		else if(host == NULL) {
 			int lenhost = strlen(argv[i]);
-			host = (char *) malloc(lenhost*sizeof(char));
+			host = (char *) malloc((1+lenhost)*sizeof(char));
 			int j;
-			for(j=0; j<lenhost; j++){
+			for(j=0; j<=lenhost; j++){
 				host[j] = argv[i][j];
 				}
 		}
@@ -91,6 +95,7 @@ int main(int argc, char *argv[]){
 		fprintf(stderr, "Error real_adress: %s.\n", gai_strerror(err));
 	  return -1;
 	}
+	free(host);
 	sfd=create_socket(&addr,port,NULL,-1);
 	if(sfd<-1){
 		fprintf(stderr, "Error create_socket.\n");
@@ -104,6 +109,7 @@ int main(int argc, char *argv[]){
 			perror("open out file");
 			return -1;
 		}
+		free(file);
 	}
 
 	pkt_t ** buffer=(pkt_t**)malloc(sizeof(pkt_t*)*32);
@@ -121,6 +127,16 @@ int main(int argc, char *argv[]){
 	while(!eof1){//début de la boucle
 	  char *buf[528];
 	  if(buffer[expSeqnum%WINDOWSIZE]!=NULL){//Si l'element qu'on veut est dans la queue
+		  if(pkt_get_length(buffer[expSeqnum%WINDOWSIZE])==0 && pkt_get_seqnum(buffer[expSeqnum%WINDOWSIZE])==expSeqnum){ //Si c'est la fin du fichier
+			  fprintf(stderr,"Arrive ici");
+			  eof1=1;
+			  pkt_set_type(buffer[expSeqnum%WINDOWSIZE],1);
+			  fprintf(stderr,"Packet de fin de fichier reçu");
+			  
+			  sendAck(buffer[expSeqnum%WINDOWSIZE]);
+			  
+
+			}//fin de fin du fichier
 	    expSeqnum+=1;
 	    lastack+=1;
 	    if(expSeqnum==255){
@@ -139,16 +155,22 @@ int main(int argc, char *argv[]){
 	    if(nbre<0) {//Si une erreur
 	      fprintf(stderr, "erreur recvfrom\n");
 	    }
+	    int k=connect(sfd, (struct sockaddr *) &addr, solen); 
+	    if(k==-1){
+			fprintf(stderr, "erreur connect\n");
+			}
 	    else{//Si on a lu qqch
-			pkt=(pkt_t*)malloc(sizeof(pkt_t));
+			pkt=pkt_new();
 			if(pkt==NULL){
 				fprintf(stderr,"erreur malloc");
 			}
 	      pkt_status_code verifstat=pkt_decode((const char*) buf,nbre,pkt);
+	      //fprintf(stderr, "taille du pkt apres decodage: %d\n", pkt->length);
+	      fprintf(stderr, "	length: %d \n", pkt_get_length(pkt));
+		  fprintf(stderr, "	seqnum: %d \n", pkt_get_seqnum(pkt));
+		  fprintf(stderr, "	expSeqnum: %d \n", expSeqnum);
 	      if(verifstat!=PKT_OK){
-			fprintf(stderr, " statut length: %d\n",E_LENGTH);
-			fprintf(stderr, " statut CRC: %d\n",E_CRC);
-			fprintf(stderr, " statut: %d\n",verifstat);
+			
 		    fprintf(stderr, "erreur du décodage1\n");
 	      }
 	      else{//si on a réussi a le décoder
@@ -160,8 +182,11 @@ int main(int argc, char *argv[]){
 		      if(pkt_get_seqnum(pkt)==expSeqnum){//Si c'est celui attendu
 
 			if(pkt_get_length(pkt)==0 && pkt_get_seqnum(pkt)==expSeqnum){ //Si c'est la fin du fichier
+			  fprintf(stderr,"Arrive ici\n");
 			  eof1=1;
 			  pkt_set_type(pkt,1);
+			  fprintf(stderr,"Packet de fin de fichier reçu \n");
+			  
 			  sendAck(pkt);
 			  
 
@@ -175,7 +200,15 @@ int main(int argc, char *argv[]){
 			  if(lastack==WINDOWSIZE-1){
 			    lastack=0;
 			  }
+			  //fprintf(stderr,"Je suis ici\n");
 			  printPkt(pkt);
+			  if(nbre<16){
+				  pkt_set_length(pkt,nbre-12);
+			  }
+			  else{
+			  pkt_set_length(pkt,nbre-16);
+				}
+			  //fprintf(stderr,"Je suis la\n");
 			  sendAck(pkt);
 			  
 			  
@@ -190,13 +223,15 @@ int main(int argc, char *argv[]){
 		}//fin du si ce n'est pas un element de la queue
 
 	      }//fin de si on a reussi a le decoder
+	      pkt_del(pkt);
 	    }// fin du si on a lu qqch
 	  }//Si il n'était pas dans la queue
 
 	}//fin de la boucle while
-	pkt_del(pkt);
+	
 	for(i=0;i<32;i++){
 	  free(buffer[i]);
 	}
 	free(buffer);
+	return 0;
 }
