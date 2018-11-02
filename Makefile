@@ -17,7 +17,6 @@ LDFLAGS += -rdynamic
 
 # Default target
 all: receiver sender
-	clear
 
 sender: src/sender.o src/socket.o src/queue.o src/packet_implem.c
 
@@ -26,7 +25,7 @@ receiver: src/receiver.o src/socket.o src/queue.o src/packet_implem.c
 %: src/%.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-tests :
+tests:
 	./tests/test1.sh
 	./tests/test2.sh
 
@@ -37,4 +36,4 @@ clean :
 # We use an implicit rule: look for the files record.c/database.c,
 # compile them and link the resulting *.o's into an executable named database
 
-.PHONY: clean
+.PHONY: tests clean

@@ -238,7 +238,7 @@ int main(int argc, char *argv[]){
 			currentTime = clock() / CLOCKS_PER_SEC;
 			NODE * runner = q->tail;
 			for(i=1; i<=q->size; i++){
-				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 2) ){
+				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 4) ){
 					//fprintf(stderr, "clock check\n");
 					//fprintf(stderr, "   currentTime: %d\n", currentTime);
 					//fprintf(stderr, "   get_timestamp: %d\n", pkt_get_timestamp(runner->item));

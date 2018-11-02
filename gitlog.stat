@@ -1,3 +1,619 @@
+commit d784225ca76294b0f26d95aa02ff4f901f66c2b9
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Nov 2 16:11:14 2018 +0100
+
+    suite de test fin
+
+ Makefile       |  5 +++--
+ tests/test1.sh |  6 +++---
+ tests/test2.sh | 51 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 57 insertions(+), 5 deletions(-)
+
+commit 5f6ed290c448a5b939ef35b8814593aaddeb1d4f
+Author: LouisDeVogeleer <38432465+LouisDeVogeleer@users.noreply.github.com>
+Date:   Fri Nov 2 16:36:34 2018 +0100
+
+    Add files via upload
+
+ tests/CNP3.pdf | Bin 0 -> 10669941 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit aad769248b3daebadbe092ae40aec58db6f31d45
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Nov 2 15:17:35 2018 +0100
+
+    maj tests
+
+ Makefile            |   4 ++--
+ maya.txt            |   3 ---
+ src/packet_implem.c |   1 -
+ src/receiver.c      |  16 +++++++--------
+ src/sender.c        |  10 ++++-----
+ test.sh             |  58 ----------------------------------------------------
+ tests/link_sim      | Bin 0 -> 22920 bytes
+ tests/maya.txt      |   3 +++
+ tests/test1.sh      |  51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/test2.sh      |   0
+ 10 files changed, 69 insertions(+), 77 deletions(-)
+
+commit 64ed14936017ca13a49d92258b80aa7d9caa1078
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Nov 2 12:46:21 2018 +0100
+
+    valgrind & limit buffer
+
+ src/packet_implem.c | 5 ++++-
+ src/queue.c         | 2 +-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+commit c0a01b260e42ac7040f13fd69d27ac95d85da1f6
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Nov 2 12:45:07 2018 +0100
+
+    valgrind
+
+ src/receiver.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+commit 7cd29db2c0ae97c8b01bebd42380e4f13563bd57
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Nov 2 12:13:27 2018 +0100
+
+    end of flie
+
+ src/receiver.c | 7 +------
+ src/sender.c   | 9 +++++----
+ 2 files changed, 6 insertions(+), 10 deletions(-)
+
+commit 8b1f24b192fef333e9c502823cd249c3065b6e77
+Merge: 4240cda b18ccad
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Nov 2 11:00:24 2018 +0100
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+
+commit b18ccade77ad7181b304e6d1b5087ab8e83b0478
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Nov 2 10:37:43 2018 +0100
+
+    correction
+
+ src/receiver.c |  4 ++++
+ src/sender.c   | 35 +++++++++++------------------------
+ 2 files changed, 15 insertions(+), 24 deletions(-)
+
+commit 342e74fbdc840ef17e6cc0bf8ef7d669d329b917
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Nov 2 00:22:22 2018 +0100
+
+    modif tardif
+
+ src/queue.c    |  3 +++
+ src/receiver.c | 12 ++++++------
+ src/sender.c   | 40 ++++++++++++++++++++--------------------
+ 3 files changed, 29 insertions(+), 26 deletions(-)
+
+commit 924b1478fe6c2b88638b1e64cc2175cca5cf3c6a
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 23:47:34 2018 +0100
+
+    Nack case
+
+ src/receiver.c | 15 ++++++++++-----
+ src/socket.c   |  2 +-
+ 2 files changed, 11 insertions(+), 6 deletions(-)
+
+commit 10bf9140480d6d3d1cdd44213bf4c540fae1c3a8
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 22:38:11 2018 +0100
+
+    eof correction
+
+ src/receiver.c | 6 ++++--
+ src/sender.c   | 7 ++++++-
+ 2 files changed, 10 insertions(+), 3 deletions(-)
+
+commit 4240cdafb2c9b4f4af425872ca8fe3c6569e61f9
+Merge: 5893dbf 924b147
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 14:11:10 2018 +0100
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+    
+    fusion est
+    dans une branche de sujet.
+
+commit 5893dbfe05aca0cfef66c4b7e54dc25daacc87d4
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 14:10:57 2018 +0100
+
+    convert buf
+
+ src/receiver.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+commit 6a5563d0f9a08c558c9ac9fc686e07fa37fa8444
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 12:20:17 2018 +0100
+
+    revue receiver
+
+ src/packet_implem.c |  51 +++++++++---------
+ src/receiver.c      | 148 ++++++++++++++++++++++++----------------------------
+ 2 files changed, 94 insertions(+), 105 deletions(-)
+
+commit b134fd5a000d3bb4fd24f7524f4c2b0fbbc53171
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 21:32:40 2018 +0100
+
+    indent
+
+ src/receiver.c | 37 ++++++++++++++++++-------------------
+ 1 file changed, 18 insertions(+), 19 deletions(-)
+
+commit 484c7ada2f88cb0a0cb1ab8ac5651f7b7c3b9986
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 21:27:57 2018 +0100
+
+    indent
+
+ src/receiver.c | 324 ++++++++++++++++++++++++++++-----------------------------
+ 1 file changed, 162 insertions(+), 162 deletions(-)
+
+commit 8489950e3abd33862377c0e227a4eb609e393867
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 21:12:21 2018 +0100
+
+    maj receiver
+
+ src/packet_implem.c | 12 +++------
+ src/receiver.c      | 73 ++++++++++++++++++++++-------------------------------
+ 2 files changed, 34 insertions(+), 51 deletions(-)
+
+commit 4a436dbb9a46461cfc670de5b0572647f5f60ac5
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 10:58:29 2018 +0100
+
+    maj sender NACK
+
+ src/sender.c | 20 ++++++++++++++------
+ 1 file changed, 14 insertions(+), 6 deletions(-)
+
+commit deda0192e084cbb5677d559230fa098cae31d2e8
+Merge: 4ed07d3 b277cf5
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 10:40:13 2018 +0100
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+    
+    fusion est
+    dans une branche de sujet.
+
+commit b277cf5781b861cc6425f2fde7ba2c3f05639a25
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 18:37:45 2018 +0100
+
+    le facteur et les acks
+
+ Makefile            |  1 +
+ src/packet_implem.c | 53 +++++++++++++++++-------------------------
+ src/queue.c         |  3 +++
+ src/receiver.c      | 67 ++++++++++++++++++++++++++++++++++++++++-------------
+ src/sender.c        | 29 +++++++++++------------
+ 5 files changed, 89 insertions(+), 64 deletions(-)
+
+commit 4ed07d3d65c00e57d08097127ba9add153a9b75d
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 10:38:10 2018 +0100
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+
+ test.sh | 58 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 58 insertions(+)
+
+commit a036a329dca47b206acbf1bb748cb048ce17088c
+Merge: 1337b53 10c9cb2
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 07:02:54 2018 +0100
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+
+commit 10c9cb2f5074aca8b312dabf5842a67493d6a111
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 14:00:44 2018 +0100
+
+    corr
+
+ src/receiver.c | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
+
+commit 1337b534a350d65c3f9a3f5001c296de9111d8a9
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 07:02:37 2018 +0100
+
+    sender.c fonctionne
+
+ Makefile     |  3 +++
+ src/sender.c | 27 ++++++++++++++++++++++-----
+ 2 files changed, 25 insertions(+), 5 deletions(-)
+
+commit c04dc664f6fa69addbcb79e127eeded677629329
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 05:49:52 2018 +0100
+
+    debug printf
+
+ src/packet_implem.c | 22 +++++++++++-----------
+ src/receiver.c      |  8 ++++----
+ src/socket.c        |  5 -----
+ 3 files changed, 15 insertions(+), 20 deletions(-)
+
+commit f5bb74473e5f384177d70af907abcc5e7a267ac9
+Merge: dbfb6dc a8781f0
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 05:39:22 2018 +0100
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+
+commit a8781f09f8cbf042b68806d2a4b7ff31f273821c
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 13:43:51 2018 +0100
+
+     print
+
+ src/packet_implem.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+commit ca877ae340b4caa1afeef7a14298da3dc9ddcf6a
+Author: Baptiste <bdemuysere@skywalker.info.ucl.ac.be>
+Date:   Thu Nov 1 13:39:34 2018 +0100
+
+    core dumped correction
+
+ src/receiver.c | 58 +++++++++++++++++++---------------------------------------
+ 1 file changed, 19 insertions(+), 39 deletions(-)
+
+commit dbfb6dc6572cdd999cd5d9e3a72425733d7798ea
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 05:39:14 2018 +0100
+
+    maj sender
+
+ src/sender.c | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
+
+commit 879cf4b83b21a44e7d38f44b7aa38cc54642f56c
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 03:40:28 2018 +0100
+
+    buf receiver.c
+
+ src/packet_implem.c | 51 +++++++++++++++++++++++++++------------------------
+ src/queue.c         |  1 +
+ src/receiver.c      | 20 ++++++++++----------
+ src/sender.c        |  7 +++----
+ 4 files changed, 41 insertions(+), 38 deletions(-)
+
+commit 97ac9f1a9248ad35c1c1d3b1312a0c6cd7ad882b
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 02:47:38 2018 +0100
+
+    ajout freeQeueu()
+
+ src/queue.c  | 16 +++++++++++++---
+ src/queue.h  |  3 ++-
+ src/sender.c | 20 ++++++++++++--------
+ src/socket.c |  8 ++++++++
+ 4 files changed, 35 insertions(+), 12 deletions(-)
+
+commit 90784fcc512ccf9ce6bca6c27361fd6c2ac9265b
+Merge: aa40f5d fa0ea8b
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 01:59:19 2018 +0100
+
+    repush
+
+commit fa0ea8b297344267b55f6ac58bcbb0fd9f40e62d
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Nov 1 08:53:42 2018 +0100
+
+    erreur malloc
+
+ src/socket.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit aa40f5d3d774c39cf1ab23763bb01fd731fbfc83
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 01:57:08 2018 +0100
+
+    maj socket makefile
+
+ Makefile     |  5 +++++
+ src/socket.c | 21 ++++++++-------------
+ 2 files changed, 13 insertions(+), 13 deletions(-)
+
+commit 08e52d842560335541444fb6c49b582710519575
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Nov 1 00:54:09 2018 +0100
+
+    debug socket.c
+
+ src/sender.c | 34 ++++++++++++++++------------------
+ src/socket.c | 37 ++++++++++++++++---------------------
+ 2 files changed, 32 insertions(+), 39 deletions(-)
+
+commit 3fdf97b12b0621dfecb27f2063d301ff9deb03a7
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Wed Oct 31 18:55:15 2018 +0100
+
+    corr
+
+ src/receiver.c | 28 ++++++++++++++++++----------
+ 1 file changed, 18 insertions(+), 10 deletions(-)
+
+commit 3aa1f3b2b341efdc68e3be6ea7f4f7438221bfb3
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Wed Oct 31 17:23:04 2018 +0100
+
+    correc
+
+ src/receiver.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+commit d62729e9047ab3910bd97733dca3522ea39d4932
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Tue Oct 30 23:15:53 2018 +0100
+
+     corr
+
+ src/receiver.c | 142 ++++++++++++++++++++++++++++++---------------------------
+ 1 file changed, 74 insertions(+), 68 deletions(-)
+
+commit d4ecd04e3a924fea6571991966384f976d5fca9d
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Tue Oct 30 21:15:53 2018 +0100
+
+    correction
+
+ src/receiver.c | 20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
+
+commit 40d62620bdde636ce023875586bbf663d20f84f7
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Tue Oct 30 19:34:50 2018 +0100
+
+    sendAck printPkt
+
+ src/receiver.c | 78 ++++++++++++++++++++++++----------------------------------
+ 1 file changed, 32 insertions(+), 46 deletions(-)
+
+commit 0a743f6ddcb6c225e7d09430a5c88b204e14d44e
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Mon Oct 29 20:57:10 2018 +0100
+
+    maj sender receiver
+
+ src/receiver.c | 88 +++++++++++++++++++++++++++++++++-------------------------
+ src/sender.c   |  3 ++
+ 2 files changed, 53 insertions(+), 38 deletions(-)
+
+commit 77c1cb070b03b301faf74678af95f9666ca85993
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 26 23:17:08 2018 +0200
+
+    "debut check avec Valgrind"
+
+ LINGI1341_TRTP-1.pdf | Bin 180591 -> 0 bytes
+ LINGI1341_TRTP.pdf   | Bin 180591 -> 0 bytes
+ maya.txt             |   3 +
+ src/packet_implem.c  |   6 ++
+ src/receiver.c       | 234 ++++++++++++++++++++++++---------------------------
+ src/sender.c         |  90 ++++++++++----------
+ src/socket.c         |  71 ++++++++--------
+ src/socket.h         |   4 +-
+ 8 files changed, 202 insertions(+), 206 deletions(-)
+
+commit 57ae9241593bf0eb94fb4440ccb62114829a854d
+Author: Baptiste <bdemuysere@hoth.info.ucl.ac.be>
+Date:   Fri Oct 26 13:44:58 2018 +0200
+
+    crochet
+
+ src/packet_implem.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit a8a1ddcf917c2d8df291eb674d7ce181439947d4
+Merge: 1cc920d 65f27d6
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 26 12:59:28 2018 +0200
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+
+commit 65f27d6f7c7320a52a53451274d38185a56e3bbf
+Author: Baptistedemu <38529404+Baptistedemu@users.noreply.github.com>
+Date:   Fri Oct 26 13:40:16 2018 +0200
+
+    Update packet_implem.c
+
+ src/packet_implem.c | 22 ++++++++++++----------
+ 1 file changed, 12 insertions(+), 10 deletions(-)
+
+commit 1cc920d9ce04c5a46a5446e36b3e7c2a637a5c24
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 26 12:59:12 2018 +0200
+
+    makefile error
+
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+commit 170f82347e2550b547384527ac716c1855f8dea9
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Oct 26 10:55:16 2018 +0200
+
+     correction
+
+ Makefile       | 2 +-
+ src/receiver.c | 6 ++++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+commit d64ef8e6a414e1b32694c4b1bf14803fd96e5548
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 26 10:07:26 2018 +0200
+
+    coordination de sender et receiver
+
+ src/packet_implem.c    | 12 +-----------
+ src/packet_interface.h | 13 +++++++++++++
+ src/receiver.c         | 35 +++++++++++++++++------------------
+ src/sender.c           |  4 ++--
+ 4 files changed, 33 insertions(+), 31 deletions(-)
+
+commit fb3ea2043caa56f4b0ad3eea57413c5d4024bdbf
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Fri Oct 26 09:46:54 2018 +0200
+
+    maj sender.c
+
+ Makefile     |   4 +-
+ src/queue.c  |  22 ++----
+ src/queue.h  |  15 ++--
+ src/sender.c | 225 ++++++++++++++++++++++++++++++++++++++---------------------
+ 4 files changed, 163 insertions(+), 103 deletions(-)
+
+commit 224f015877f514d86630a1234fabf46ce7acc389
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Oct 26 10:22:00 2018 +0200
+
+    compilation
+
+ src/receiver.c | 88 ++++++++++++++++++++++++++++++++++------------------------
+ 1 file changed, 52 insertions(+), 36 deletions(-)
+
+commit 62f6470ef5c1908b817218631abc64507bd453d5
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Oct 26 09:31:14 2018 +0200
+
+    Correction queue
+
+ src/receiver.c | 121 ++++++++++++++++++++++++++++++++-------------------------
+ 1 file changed, 68 insertions(+), 53 deletions(-)
+
+commit aa8936d3330a7a76c3cbfddd8a9b07b1b03ccbb4
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Oct 26 09:04:21 2018 +0200
+
+    Receiver new case
+
+ src/receiver.c | 60 +++++++++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 38 insertions(+), 22 deletions(-)
+
+commit c0dacee55a35e9bc577ed588522fe5eab75393a4
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Oct 26 08:37:56 2018 +0200
+
+    Makefile update
+
+ Makefile | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+commit 327c638aeefc52ee5c0a8f029a7ebd03b54e663a
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Fri Oct 26 00:24:03 2018 +0200
+
+    compile
+
+ src/queue.h    |  2 ++
+ src/receiver.c | 49 +++++++++++++++++++++++++++++++------------------
+ 2 files changed, 33 insertions(+), 18 deletions(-)
+
+commit af390fcb312371e1758626a41cde176cd1f44d2e
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Oct 25 19:48:38 2018 +0200
+
+    receiver
+
+ src/receiver.c | 80 ++++++++++++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 61 insertions(+), 19 deletions(-)
+
+commit e95586212820e805dbdacbb5712c892c1725a120
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Oct 25 19:16:48 2018 +0200
+
+    maj queue.c sender.c
+
+ src/queue.c  |  2 ++
+ src/sender.c | 32 +++++++++++++++++++-------------
+ 2 files changed, 21 insertions(+), 13 deletions(-)
+
+commit 6003925c945d7223c7e740f45ec4a039b7ab3d02
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Oct 25 18:52:56 2018 +0200
+
+    maj queue.c
+
+ src/queue.c | 25 +++++++++++--------------
+ 1 file changed, 11 insertions(+), 14 deletions(-)
+
+commit 1e00569885c31d9602aa18483e0f8546a06498ce
+Merge: 469b22b 1506be5
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Oct 25 18:31:49 2018 +0200
+
+    Merge branch 'master' of https://github.com/LouisDeVogeleer/TRTP
+
+commit 469b22b2a9fb31446c5765e32851365f626820fc
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Oct 25 18:31:23 2018 +0200
+
+    maj sender.c
+
+ src/sender.c | 112 ++++++++++++++++++++++++++++++++++++++++++-----------------
+ 1 file changed, 80 insertions(+), 32 deletions(-)
+
+commit 1506be5f6087b125294a17be5aaaf543dbe91cb5
+Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
+Date:   Thu Oct 25 17:59:46 2018 +0200
+
+    ajout de méthode  queue
+
+ src/queue.c | 25 +++++++++++++++++++++----
+ 1 file changed, 21 insertions(+), 4 deletions(-)
+
+commit ec4a709f1c879e05f231b9a3c05166adcdb6a979
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Thu Oct 25 17:25:53 2018 +0200
+
+    maj queue.h
+
+ src/queue.h | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+commit 8046b8034a55ca1fae460aeb7a6473d979b3938f
+Merge: 99dcbd6 32bf9ce
+Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
+Date:   Mon Oct 22 20:04:10 2018 +0200
+
+    debugging
+
+commit 32bf9ce9450bb3688635144cb14f8cd48aff7582
+Author: LouisDeVogeleer <38432465+LouisDeVogeleer@users.noreply.github.com>
+Date:   Mon Oct 22 06:15:45 2018 +0200
+
+    Add files via upload
+
+ LINGI1341_TRTP-1.pdf | Bin 0 -> 180591 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
+commit 35ba142b706c329f95bf915d262908698898db5e
+Author: LouisDeVogeleer <38432465+LouisDeVogeleer@users.noreply.github.com>
+Date:   Mon Oct 22 05:25:50 2018 +0200
+
+    Add files via upload
+
+ LINGI1341_TRTP.pdf | Bin 0 -> 180591 bytes
+ 1 file changed, 0 insertions(+), 0 deletions(-)
+
 commit 99dcbd63da443d8ca56acfb2a00d82509976f469
 Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
 Date:   Sun Oct 21 13:41:32 2018 +0200
@@ -10,15 +626,6 @@ Date:   Sun Oct 21 13:41:32 2018 +0200
  src/sender.c           | 11 +++++++----
  src/socket.c           |  2 +-
  5 files changed, 34 insertions(+), 25 deletions(-)
-
-commit 35ba142b706c329f95bf915d262908698898db5e
-Author: LouisDeVogeleer <38432465+LouisDeVogeleer@users.noreply.github.com>
-Date:   Mon Oct 22 05:25:50 2018 +0200
-
-    Add files via upload
-
- LINGI1341_TRTP.pdf | Bin 0 -> 180591 bytes
- 1 file changed, 0 insertions(+), 0 deletions(-)
 
 commit 271308980b2f4f4dc3d749bc226330bfaadd7428
 Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
@@ -76,9 +683,11 @@ Date:   Mon Oct 22 01:40:59 2018 +0200
 
     modifier nom
 
- src/{pkt.c => packet_implem.c}    | 0
- src/{pkt.h => packet_interface.h} | 0
- 2 files changed, 0 insertions(+), 0 deletions(-)
+ src/packet_implem.c    | 259 +++++++++++++++++++++++++++++++++++++++++++++++++
+ src/packet_interface.h | 124 +++++++++++++++++++++++
+ src/pkt.c              | 259 -------------------------------------------------
+ src/pkt.h              | 124 -----------------------
+ 4 files changed, 383 insertions(+), 383 deletions(-)
 
 commit 07115b1e1875e11ebbdbc0f0d5359f4405d53869
 Author: Baptistedemu <baptiste.demuysere@student.uclouvain.be>
@@ -170,9 +779,10 @@ Date:   Fri Oct 19 10:36:27 2018 +0200
 
     ajout de sender.c et receiver.c
 
- src/{main.c => receiver.c} |  0
- src/sender.c               | 16 ++++++++++++++++
- 2 files changed, 16 insertions(+)
+ src/main.c     | 10 ----------
+ src/receiver.c | 10 ++++++++++
+ src/sender.c   | 16 ++++++++++++++++
+ 3 files changed, 26 insertions(+), 10 deletions(-)
 
 commit 30d5100597a72db5855289c0cc2a5b7ecfc738e8
 Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
@@ -180,9 +790,10 @@ Date:   Fri Oct 19 09:22:09 2018 +0200
 
     creation des dossiers
 
- Makefile             | 1 +
- main.c => src/main.c | 0
- 2 files changed, 1 insertion(+)
+ Makefile   |  1 +
+ main.c     | 10 ----------
+ src/main.c | 10 ++++++++++
+ 3 files changed, 11 insertions(+), 10 deletions(-)
 
 commit fea037e32969b105f7830911465fc10b5cf465dd
 Author: LouisDeVogeleer <louis.devogeler@student.uclouvain.be>
