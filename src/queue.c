@@ -41,6 +41,9 @@ int enqueue(Queue * q, pkt_t * item){
 }
 
 pkt_t * dequeue(Queue * q){
+	if(q->size == 0){
+		return NULL;
+	}
 	pkt_t * item = q->tail->item;
 	NODE * toFree = q->tail;
 	q->tail = q->tail->prev;
