@@ -46,7 +46,7 @@ int sendPacket(int fd, pkt_t * packet, size_t dataLen){
 	}
 
 	if(write(fd, bufWrite, dataLen)  < 0){
-		perror("failed to write\n");
+		perror("failed to write sendPacket\n");
 		return -1;
 	}
 	return 0;
@@ -147,7 +147,6 @@ int main(int argc, char *argv[]){
 		if(err > 0){
 			/* Acces a la lecture de STDIN ou du fichier d'entree. */
 			if(FD_ISSET(rfd, &rfds) && sentEndPacket == 0){
-				//fprintf(stderr, "nouveau paquet !\n");
 				memset((void*) payload, 0, 512);
 				readRet = read(rfd, payload, 512);
 
@@ -158,8 +157,7 @@ int main(int argc, char *argv[]){
 				}
 
 				/* Creation du paquet de deconnexion. */
-				else if(readRet == 1){
-					//fprintf(stderr, "fin de journee :D\n");
+				else if((readRet == 1 && isInFile == 0) || readRet == 0){
 					newPacket = createPacket("", 0);
 					sentEndPacket = 1;
 				}
@@ -167,25 +165,23 @@ int main(int argc, char *argv[]){
 				else perror("failed to read input\n");
 
 				if(enqueue(q, newPacket) != 0){
-					//fprintf(stderr, "failed to enqueue newPacket\n");
+					fprintf(stderr, "failed to enqueue newPacket\n");
 					pkt_del(newPacket);
 					freeQueue(q);
 					return -1;
 				}
-				//fprintf(stderr, "	placé dans la queue le seqnum: %d\n", pkt_get_seqnum(newPacket));
-
-				//fprintf(stderr, "	length: %d \n", pkt_get_length(newPacket));
-				//fprintf(stderr, "	seqnum: %d \n", pkt_get_seqnum(newPacket));
+				fprintf(stderr, "    queue is size %d\n", q->size);
+				
 				if(sendPacket(sfd, newPacket, readRet +16) != 0){
 					pkt_del(newPacket);
 					freeQueue(q);
 					return -1;
 				}
+				fprintf(stderr, "--- sent data %d\n", pkt_get_seqnum(newPacket));
 			}
 
 			/* Acces a la lecture des donnees du reseau. */
 			if(FD_ISSET(sfd, &rfds)){
-				//fprintf(stderr, "c'est le facteur !\n");
 				recPacket = pkt_new();
 				memset((void*) bufRead, 0, 528);
 				if((err = read(sfd, bufRead, 528)) > 0){
@@ -196,12 +192,12 @@ int main(int argc, char *argv[]){
 
 					/* ACK */
 					if(pkt_get_type(recPacket) == 2){
+						
 						lastAck = pkt_get_seqnum(recPacket);
-						//fprintf(stderr, "	recu l'ACK avec seqnum: %d\n", lastAck);
-						while(q->size != 0 && pkt_get_seqnum(seeTail(q)) < lastAck){
+						fprintf(stderr, "*** received ACK : sq_tail=%d lastAck=%d\n",pkt_get_seqnum(seeTail(q)), lastAck);
+						while(q->size != 0 && (pkt_get_seqnum(seeTail(q))%WINDOWSIZE) < lastAck){
 							dequeue(q);
 						}
-						//fprintf(stderr, "	elements dans la queue: %d\n", q->size);
 
 						if(pkt_get_timestamp(recPacket) < RTT){
 							RTT = pkt_get_timestamp(recPacket);
@@ -211,6 +207,7 @@ int main(int argc, char *argv[]){
 					/* NACK */
 					if(pkt_get_type(recPacket) == 3 && q->size!= 0){
 						int sq = pkt_get_seqnum(recPacket);
+						fprintf(stderr, "*** received NACK %d\n", sq);
 						NODE * runner = q->head;
 						for(i=0; i<q->size; i++){
 							if(pkt_get_seqnum(runner->item) == sq){
@@ -229,21 +226,11 @@ int main(int argc, char *argv[]){
 						}
 					}
 
-					/* Reception du endPacket. */
-					//fprintf(stderr, "	type: %d\n", pkt_get_type(recPacket));
-					//fprintf(stderr, "	length: %d\n", pkt_get_length(recPacket));
-					//fprintf(stderr, "	seqnum: %d\n", pkt_get_seqnum(recPacket));
-					//fprintf(stderr, "	seqnum of sender: %d\n", seqNum);
-					//fprintf(stderr, "	seqnum lastack: %d\n", lastAck);
 					if(pkt_get_type(recPacket) == 1 && pkt_get_length(recPacket) == 0 && pkt_get_seqnum(recPacket) == lastAck){
-						//fprintf(stderr, "recu l'ACK du eof\n");
 						recLastAck = 1;
 					}
-					pkt_del(recPacket);
 				}
-				else {
-					//fprintf(stderr, "	ah non c'est pour le voisin\n");
-				}
+				pkt_del(recPacket);
 			}
 
 			/* Verification des timer et renvoi des paquets non-acquites. */

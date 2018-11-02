@@ -146,6 +146,7 @@ int main(int argc, char *argv[]){
         printPkt(storedPkt);
       }
       
+      fprintf(stderr, "--- sent ACK %d\n", expSeqnum);
       sendAck(storedPkt);
       pkt_del(storedPkt);
     }// fin du si l'element voulue est dans le buffer
@@ -168,7 +169,9 @@ int main(int argc, char *argv[]){
         }
         pkt = pkt_new();
         pkt_status_code verifstat=pkt_decode((const char*) buf,nbre,pkt);
+        fprintf(stderr, "*** received data %d\n", pkt_get_seqnum(pkt));
 		if(pkt_get_tr(pkt)==1 && pkt_get_type(pkt)==1){
+			fprintf(stderr, "--- sent NACK %d\n", pkt_get_seqnum(pkt));
 			sendAck(pkt);
 		}
         if(verifstat!=PKT_OK){
@@ -194,6 +197,7 @@ int main(int argc, char *argv[]){
 
                     printPkt(pkt);
                   }
+                  fprintf(stderr, "--- sent ACK %d\n", expSeqnum);
                   sendAck(pkt);
                   pkt_del(pkt);
                 }//Fin du si c'est celui attendu
