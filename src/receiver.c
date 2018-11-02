@@ -55,7 +55,7 @@ void printPkt(pkt_t* pkt4){
 }
 
 int main(int argc, char *argv[]){
-  pkt=pkt_new();
+
   int isOutFile = 0;         /*  Si = 1, le payload ira vers file. Sinon, le payload vient de STDOUT.*/
   char * file = NULL;
   //char * payload;
@@ -198,7 +198,7 @@ int main(int argc, char *argv[]){
                   }
                   fprintf(stderr, "--- sent ACK %d\n", expSeqnum);
                   sendAck(pkt);
-                  pkt_del(pkt);
+                  
                 }//Fin du si c'est celui attendu
 
                 else{//Si c'est pas celui attendu
@@ -209,6 +209,7 @@ int main(int argc, char *argv[]){
             }//fin du si le seqnum est plus petit on l'ignore
           }//fin du si ce n'est pas un element de la queue
         }//fin de si on a reussi a le decoder
+        pkt_del(pkt);
       }// fin du si on a lu qqch
     }//Si il n'était pas dans la queue
   }//fin de la boucle while
