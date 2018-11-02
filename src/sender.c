@@ -9,7 +9,6 @@
 #include <sys/select.h>
 #include <fcntl.h>
 
-//#include "packet_implem.c"
 #include "socket.h"
 #include "queue.h"
 
@@ -170,14 +169,12 @@ int main(int argc, char *argv[]){
 					freeQueue(q);
 					return -1;
 				}
-				//fprintf(stderr, "    added %d queue is size %d\n",pkt_get_seqnum(seeTail(q)), q->size);
 
 				if(sendPacket(sfd, newPacket, readRet +16) != 0){
 					pkt_del(newPacket);
 					freeQueue(q);
 					return -1;
 				}
-				//fprintf(stderr, "--- sent data %d\n", pkt_get_seqnum(newPacket));
 			}
 
 			/* Acces a la lecture des donnees du reseau. */
@@ -194,9 +191,7 @@ int main(int argc, char *argv[]){
 					if(pkt_get_type(recPacket) == 2){
 
 						lastAck = pkt_get_seqnum(recPacket);
-						//fprintf(stderr, "*** received ACK : sq_tail=%d lastAck=%d\n",pkt_get_seqnum(seeTail(q)), lastAck);
 						while(q->size != 0 && (pkt_get_seqnum(seeTail(q))%254) < lastAck){
-							//fprintf(stderr, "	dequeue %d because lastAck %d\n", pkt_get_seqnum(seeTail(q)), lastAck);
 							dequeue(q);
 						}
 
@@ -208,7 +203,6 @@ int main(int argc, char *argv[]){
 					/* NACK */
 					if(pkt_get_type(recPacket) == 3 && q->size!= 0){
 						int sq = pkt_get_seqnum(recPacket);
-						//fprintf(stderr, "*** received NACK %d\n", sq);
 						NODE * runner = q->head;
 						for(i=0; i<q->size; i++){
 							if(pkt_get_seqnum(runner->item) == sq){
@@ -239,10 +233,6 @@ int main(int argc, char *argv[]){
 			NODE * runner = q->tail;
 			for(i=1; i<=q->size; i++){
 				if((currentTime - pkt_get_timestamp(runner->item)) > (RTT + 4) ){
-					//fprintf(stderr, "clock check\n");
-					//fprintf(stderr, "   currentTime: %d\n", currentTime);
-					//fprintf(stderr, "   get_timestamp: %d\n", pkt_get_timestamp(runner->item));
-					//fprintf(stderr, "   RTT: %d\n", RTT);
 					if(pkt_set_timestamp(runner->item, clock()/CLOCKS_PER_SEC) != PKT_OK){
 						fprintf(stderr, "failed to reset timestamp\n");
 						freeQueue(q);
