@@ -41,7 +41,7 @@ void sendAck(pkt_t* pkt3){
   //fprintf(stderr, "sfd: %d\n",sfd);
   err=write(sfd,send,len);
   if(err<0){
-    perror("erreur write ICIII");
+    perror("erreur write");
   }
 
 }
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]){
 
 
   if(isOutFile == 1){
-    wfd = open(file, O_WRONLY|O_CREAT, S_IWUSR);
+    wfd = open(file, O_WRONLY|O_CREAT, S_IRWXU);
     if(wfd < 0){
       perror("open out file");
       return -1;
@@ -163,14 +163,14 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "erreur connect\n");
       }
       else{//Si on a lu qqch
-        if(pkt==NULL){
-          fprintf(stderr,"erreur malloc");
-        }
         pkt = pkt_new();
+        if(pkt==NULL){
+          fprintf(stderr,"erreur malloc\n");
+        }
         pkt_status_code verifstat=pkt_decode((const char*) buf,nbre,pkt);
-        fprintf(stderr, "*** received data %d\n", pkt_get_seqnum(pkt));
+        //fprintf(stderr, "*** received data %d\n", pkt_get_seqnum(pkt));
 		if(pkt_get_tr(pkt)==1 && pkt_get_type(pkt)==1){
-			fprintf(stderr, "--- sent NACK %d\n", pkt_get_seqnum(pkt));
+			//fprintf(stderr, "--- sent NACK %d\n", pkt_get_seqnum(pkt));
 			sendAck(pkt);
 		}
         if(verifstat!=PKT_OK){
@@ -196,9 +196,9 @@ int main(int argc, char *argv[]){
 
                     printPkt(pkt);
                   }
-                  fprintf(stderr, "--- sent ACK %d\n", expSeqnum);
+                  //fprintf(stderr, "--- sent ACK %d\n", expSeqnum);
                   sendAck(pkt);
-                  
+
                 }//Fin du si c'est celui attendu
 
                 else{//Si c'est pas celui attendu

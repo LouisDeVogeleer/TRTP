@@ -30,7 +30,6 @@ return new;
 void pkt_del(pkt_t *pkt)
 {
     if (pkt->payload != NULL){
-        fprintf(stderr, "free %d\n", pkt_get_seqnum(pkt));
         free(pkt->payload);
         free(pkt);
     }
