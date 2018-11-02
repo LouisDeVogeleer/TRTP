@@ -4,7 +4,7 @@
 rm -f tests/copy_maya.txt
 
 # On lance le receiver et capture sa sortie standard
-./receiver -f tests/copy_maya.txt :: 3001 2>receiver.log  &
+./receiver -f tests/copy_maya.txt :: 3101 2>receiver.log  &
 receiver_pid=$!
 
 cleanup()
@@ -16,7 +16,7 @@ cleanup()
 trap cleanup SIGINT  # Kill les process en arrière plan en cas de ^-C
 
 # On démarre le transfert
-if ! ./sender ::1 3001 < tests/maya.txt 2>sender.log; then
+if ! ./sender ::1 3101 < tests/maya.txt 2>sender.log; then
   echo "Crash du sender!"
   cat sender.log
   err=1  # On enregistre l'erreur
@@ -47,5 +47,5 @@ if [[ "$(md5sum tests/maya.txt | awk '{print $1}')" != "$(md5sum tests/copy_maya
   exit 1
 else
   echo "Le transfert est réussi!"
-  exit ${err:-0}  # En cas d'erreurs avant, on renvoie le code d'erreur
+  exit 0  # En cas d'erreurs avant, on renvoie le code d'erreur
 fi

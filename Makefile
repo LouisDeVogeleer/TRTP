@@ -26,8 +26,9 @@ receiver: src/receiver.o src/socket.o src/queue.o src/packet_implem.c
 %: src/%.o
 	$(CC) $^ -o $@ $(LDFLAGS)
 
-test :
-	./tests/test.sh
+tests :
+	./tests/test1.sh
+	./tests/test2.sh
 
 clean :
 		rm src/*.o
