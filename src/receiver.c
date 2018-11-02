@@ -27,7 +27,7 @@ void sendAck(pkt_t* pkt3){
   if(pkt_get_tr(pkt3)==1){
 	  pkt_set_type(pkt3, PTYPE_NACK);
   }
-	  
+
   size_t len=12;
   char send[12];
   pkt_status_code stat=pkt_encode(pkt3,send,&len);
@@ -145,12 +145,7 @@ int main(int argc, char *argv[]){
         }
         printPkt(storedPkt);
       }
-<<<<<<< HEAD
 
-=======
-      
-      fprintf(stderr, "--- sent ACK %d\n", expSeqnum);
->>>>>>> b18ccade77ad7181b304e6d1b5087ab8e83b0478
       sendAck(storedPkt);
       pkt_del(storedPkt);
     }// fin du si l'element voulue est dans le buffer

@@ -170,8 +170,8 @@ int main(int argc, char *argv[]){
 					freeQueue(q);
 					return -1;
 				}
-				fprintf(stderr, "    queue is size %d\n", q->size);
-				
+				fprintf(stderr, "    added %d queue is size %d\n",pkt_get_seqnum(seeTail(q)), q->size);
+
 				if(sendPacket(sfd, newPacket, readRet +16) != 0){
 					pkt_del(newPacket);
 					freeQueue(q);
@@ -192,10 +192,11 @@ int main(int argc, char *argv[]){
 
 					/* ACK */
 					if(pkt_get_type(recPacket) == 2){
-						
+
 						lastAck = pkt_get_seqnum(recPacket);
 						fprintf(stderr, "*** received ACK : sq_tail=%d lastAck=%d\n",pkt_get_seqnum(seeTail(q)), lastAck);
-						while(q->size != 0 && (pkt_get_seqnum(seeTail(q))%WINDOWSIZE) < lastAck){
+						while(q->size != 0 && (pkt_get_seqnum(seeTail(q))%254) < lastAck){
+							fprintf(stderr, "	dequeue %d because lastAck %d\n", pkt_get_seqnum(seeTail(q)), lastAck);
 							dequeue(q);
 						}
 
