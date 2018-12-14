@@ -1,0 +1,10 @@
+2) dig -t AAAA inl.info.ucl.ac.be (AAAA pour ipv6, A pour ipv4
+3) dig -t ns info.ucl.ac.be
+4) dig -t NS be donne les nameservers y,a,d,x,c,b.ns.dns.be
+   dig -t AAAA a(ou autres).ns.dns.be donne leurs adresse ipv6
+5) dig -t ns donne tous les root servers de .
+7) dig -t AAAA google.com donne dans la colonne 2 le TTL(lifetime) de la requête (300s)
+8) dig -t MX  uclouvain.be
+	      student.uclouvain.be
+10) Connaitre l'id de la requete peut être dangereux si un attanquant se fait passer pour la banque car le Client se connectera à l'attaquant. On ne peut pas voler des infos avec le DNS mais c'est possible dans le cas où le client se connecte à l'attaquant.
+11) time dig +tcp, time dig +udp le protocole UDP est le plus rapide
